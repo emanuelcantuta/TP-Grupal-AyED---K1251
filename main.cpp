@@ -1,6 +1,7 @@
 #include <iostream>
 using namespace std;
 
+void SepararPorCategoria(char* , char*, char* );
 float stringToSeconds(char [], int);
 void secondsToString(float, char *);
 int compararTiempos (float valor, float referencia);
@@ -24,6 +25,43 @@ float stringToSeconds(char horario[], int longitud){
     + (static_cast<float>(horario[9]-'0'))/10;
     
     return totalSegundos;
+}
+
+void SepararPorCategoria(char* archivoentrada, char* archivocategoria1, char* archivocategoria2){
+	
+	RegCorredores Actual;
+    FILE* entrada = fopen(archivoentrada,"rb");
+    
+    if(!entrada){
+    	cout<<" El archivo no pudo leerse correctamente";
+    	return;
+	}
+	
+	FILE* categoria1 = fopen(archivocategoria1, "wb");
+	
+	if(!categoria1){
+    	cout<<" El archivo no pudo crearse correctamente";
+    	return;
+	}
+	
+	FILE* categoria2 = fopen(archivocategoria2, "wb");
+	
+		if(!categoria2){
+    	cout<<" El archivo no pudo crearse correctamente";
+    	return;
+	}
+    
+    while ( fread( &Actual ,sizeof(RegCorredores), 1, entrada) == 1){
+    	if(strncmp( Actual.categoria, "4 Refugios Clasica", 18 ) == 0){	
+    		fwrite(&Actual, sizeof(RegCorredores), 1, categoria1);
+		}
+		else{
+			fwrite(&Actual, sizeof(RegCorredores), 1, categoria2);
+		}
+	}
+	fclose(entrada); 
+	fclose(categoria1);
+	fclose(categoria2);
 }
 
 void secondsToString(float totalSegundos, char* resultado) {
@@ -85,36 +123,3 @@ struct ReporteCorredores{
 	char difPrimero[11];
 	char difAnterior[11];
 };
-
-
-ReporteCorredores Actual;
-    
-    FILE* ArchivoCorredores = fopen("C:/Users/lucar/Desktop/codigos/DatosTP/Archivo corredores 4Refugios.bin","rb");
-    
-    if(!ArchivoCorredores){
-    	cout<<" El archivo no pudo leerse correctamente";
-    	return 1;
-	}
-	
-	FILE* ArchivoClasica = fopen("C:/Users/lucar/Desktop/codigos/DatosTP/Archivo corredores clasica.bin", "wb");
-	
-	if(!ArchivoClasica){
-    	cout<<" El archivo no pudo leerse correctamente";
-    	return 1;
-	}
-	
-	FILE* ArchivoNonstop = fopen("C:/Users/lucar/Desktop/codigos/DatosTP/Archivo corredores nonstop.bin", "wb");
-	
-		if(!ArchivoNonstop){
-    	cout<<" El archivo no pudo leerse correctamente";
-    	return 1;
-	}
-    
-    while ( fread( &Actual ,sizeof(ReporteCorredores), 1, ArchivoCorredores) == 1){
-    	if(strcmp( Actual.categoria, "Clasica" ) == 0){
-    		fwrite(&Actual, sizeof(ReporteCorredores), 1, ArchivoClasica);
-		}
-		else{
-			fwrite(&Actual, sizeof(ReporteCorredores), 1, ArchivoNonstop);
-		}
-	}
