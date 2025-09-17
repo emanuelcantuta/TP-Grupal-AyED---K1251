@@ -3,19 +3,15 @@ using namespace std;
 
 float stringToSeconds(char [], int);
 void secondsToString(float, char *);
+int compararTiempos (float valor, float referencia);
+
+struct RegCorredores; // Estructura con los tiempos
+struct CorredoresCiudad; // Localidades con detalles
 
 int main() {
-    char horas[11] = {'1','2',':','3','5',':','1','6','.','2','\0'};
-    
-	cout << "Horario original: " << horas << endl;
 
-    float totalSegundos = stringToSeconds(horas, 11);
-    cout << "Total en segundos: " << totalSegundos << endl;
-
-    char resultado[11];
-    secondsToString(totalSegundos, resultado);
-    cout << "Horario reconstruido: " << resultado << endl;
-    
+	
+	
 	return 0;
 }
 
@@ -53,5 +49,26 @@ void secondsToString(float totalSegundos, char* resultado) {
     resultado[9] = decAux + 48;
     resultado[10] = '\0';
 }	
-	
-	
+
+int compararTiempos (float referencia, float valor)
+{
+	int diferencia = referencia - valor;
+	return diferencia;
+}
+
+struct RegCorresdores {
+	int numero;
+	char nombreApellido[50];
+	char categoria[50];
+	char genero; // F/M
+	char localidad[40];
+	char llegada[11];
+};
+
+struct CorresdoresCiudad {
+	int numero;
+	char nombreApellido[50];
+	char localidad[40];
+	char ciudad[11];
+};
+
