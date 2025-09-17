@@ -7,7 +7,7 @@ int compararTiempos (float valor, float referencia);
 
 struct RegCorredores; // Estructura con los tiempos
 struct CorredoresCiudad; // Localidades con detalles
-
+struct ReporteCorredores; // Struct del Archivo final
 int main() {
 
 	
@@ -71,4 +71,19 @@ struct CorresdoresCiudad {
 	char localidad[40];
 	char ciudad[11];
 };
+
+struct ReporteCorredores{
+	int posGral;
+	int posGenero;
+	int posCategoria;
+	int numero;
+	char nombreApellido[50];
+	char categoria[50];
+	char genero; // F/M
+	char localidad[40];
+	char llegada[11];
+	char difPrimero[11];
+	char difAnterior[11];
+};
+
 
