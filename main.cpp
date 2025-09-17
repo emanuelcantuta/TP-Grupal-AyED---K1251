@@ -89,32 +89,32 @@ struct ReporteCorredores{
 
 ReporteCorredores Actual;
     
-    FILE* ArchivoCorredores = fopen("C:\Users\lucar\Desktop\codigos\DatosTP\Archivo corredores 4Refugios.bin","rb");
+    FILE* ArchivoCorredores = fopen("C:/Users/lucar/Desktop/codigos/DatosTP/Archivo corredores 4Refugios.bin","rb");
     
     if(!ArchivoCorredores){
     	cout<<" El archivo no pudo leerse correctamente";
     	return 1;
 	}
 	
-	FILE* ArchivoClasica = fopen("C:\Users\lucar\Desktop\codigos\DatosTP\Archivo corredores clasica.bin", "wb");
+	FILE* ArchivoClasica = fopen("C:/Users/lucar/Desktop/codigos/DatosTP/Archivo corredores clasica.bin", "wb");
 	
 	if(!ArchivoClasica){
     	cout<<" El archivo no pudo leerse correctamente";
     	return 1;
 	}
 	
-	FILE* ArchivoNonstop = fopen("C:\Users\lucar\Desktop\codigos\DatosTP\Archivo corredores nonstop.bin", "wb");
+	FILE* ArchivoNonstop = fopen("C:/Users/lucar/Desktop/codigos/DatosTP/Archivo corredores nonstop.bin", "wb");
 	
 		if(!ArchivoNonstop){
     	cout<<" El archivo no pudo leerse correctamente";
     	return 1;
 	}
     
-    while ( fread( &Actual ,sizeof(ReporteCorredores), 1, ArchivoCorredores) = 1){
-    	if(strcmp( Actual.categoria, "Clasica" = 0 )){
-    		fwrite(Actual, sizeof(ReporteCorredores), 1, ArchivoClasica)
+    while ( fread( &Actual ,sizeof(ReporteCorredores), 1, ArchivoCorredores) == 1){
+    	if(strcmp( Actual.categoria, "Clasica" ) == 0){
+    		fwrite(&Actual, sizeof(ReporteCorredores), 1, ArchivoClasica);
 		}
 		else{
-			fwrite(Actual, sizeof(ReporteCorredores), 1, ArchivoNonstop)
+			fwrite(&Actual, sizeof(ReporteCorredores), 1, ArchivoNonstop);
 		}
 	}
