@@ -1,25 +1,18 @@
 #include <iostream>
 #include <cstring>
-#include <stdlib.h>
 
 using namespace std;
 
-float stringToSeconds(char [], int);
-void secondsToString(float, char *);
-int compararTiempos (float valor, float referencia);
-void BinToTxt(const char *archivoEntrada,const char *archivoSalida);
-void SepararPorCategoria(const char* archivoentrada,const char* archivocategoria1,const char* archivocategoria2);
-
 struct RegCorredores {
-	int numero;
-	char nombreApellido[50];
-	char categoria[50];
-	char genero; // F/M
-	char localidad[40];
-	char llegada[11];
+    int numero;
+    char nombreApellido[50];
+    char categoria[50];
+    char genero;
+    char localidad[40];
+    char llegada[11];
 };
 
-struct CorredoresCiudad {
+struct CorresdoresCiudad {
 	int numero;
 	char nombreApellido[50];
 	char localidad[40];
@@ -40,13 +33,67 @@ struct ReporteCorredores{
 	char difAnterior[11];
 };
 
+//prototipos
+void separarPorCarrera(FILE* , FILE*, FILE* );
+float horarioASegundos(char [], int);
+void segundosAHorario(float, char *);
+int compararTiempos (float , float );
+//funcion para leer
+void leerArchivoConsola(char *);
+//pasar a vector para trabajar en él y leer (prueba)
+void cargarCorredoresVector(FILE *, RegCorredores [], int&);
+void leerVectorCorredores(RegCorredores [], int);
+
 int main() {
-	SepararPorCategoria("Archivo corredores 4Refugios.bin","Archivo corredores clasica.bin","Archivo corredores nonstop.bin");
-	BinToTxt("Archivo corredores clasica.bin","Archivo corredores clasica.txt");
+	char rutaEntrada[] = "Archivo corredores 4Refugios.bin";
+    char rutaCategoria1[] = "categoria1.bin";
+    char rutaCategoria2[] = "categoria2.bin";
+    int longitud = 1000;
+	RegCorredores regCorredoresV[longitud];
+	
+	FILE* entrada = fopen(rutaEntrada, "rb");
+    FILE* categoria1 = fopen(rutaCategoria1, "wb");
+    FILE* categoria2 = fopen(rutaCategoria2, "wb");
+
+    if (!entrada || !categoria1 || !categoria2) {
+        cout << "Error al abrir uno de los archivos.\n";
+        return 1;
+    }
+    
+	//funcional
+	/*cargarCorredoresVector(entrada, regCorredoresV, longitud);
+	leerVectorCorredores(regCorredoresV, longitud);
+	*/	
+	//funcional
+	
+    separarPorCarrera(entrada, categoria1, categoria2);
+	//ver si se creo y separo correctamente el archivo
+	cout << "Archivo Categoria Clasica" << endl;
+	leerArchivoConsola(rutaCategoria1);
+	cout << "----------------------------------------------------------------------------------------------" << endl;
+	cout << "Archivo Categoria NonStop" << endl;
+	leerArchivoConsola(rutaCategoria2);
+
+	//cierre de archivos
+    fclose(entrada);
+    fclose(categoria1);
+    fclose(categoria2);
 	return 0;
 }
 
-float stringToSeconds(char horario[], int longitud){
+void separarPorCarrera(FILE* entrada, FILE* categoria1, FILE* categoria2){
+	RegCorredores Actual;
+
+    while (fread(&Actual, sizeof(RegCorredores), 1, entrada) == 1) {
+        if (strncmp(Actual.categoria, "4 Refugios Clasica", 18) == 0) {
+            fwrite(&Actual, sizeof(RegCorredores), 1, categoria1);
+        } else {
+            fwrite(&Actual, sizeof(RegCorredores), 1, categoria2);
+        }
+    }
+}
+
+float horarioASegundos(char horario[], int longitud){
 	float totalSegundos = 0.0;
     
 	totalSegundos = ((horario[0]-'0')*10 + (horario[1]-'0')) * 3600
@@ -57,7 +104,7 @@ float stringToSeconds(char horario[], int longitud){
     return totalSegundos;
 }
 
-void secondsToString (float totalSegundos, char* resultado){
+void segundosAHorario(float totalSegundos, char* resultado) {
 	totalSegundos *= 10;	
 	int aux = totalSegundos;
 	
@@ -82,74 +129,50 @@ void secondsToString (float totalSegundos, char* resultado){
 }	
 
 int compararTiempos (float referencia, float valor){
-	int diferencia = referencia - valor;
+	int diferencia = referencia - valor; 
 	return diferencia;
 }
 
-//Funcion que le das un archivo .bin y lo pasa a .txt (Cambia el struct si es necesario)
-void BinToTxt(const char *archivoEntrada,const char *archivoSalida){
+void leerArchivoConsola(char *archivo){
+	FILE* f = fopen(archivo, "rb");
 	
-	FILE* archivoBin = fopen(archivoEntrada, "rb");
-    FILE* archivoTxt = fopen(archivoSalida, "w");
-
-	    if (!archivoBin || !archivoTxt) {
-	        printf("Error al abrir los archivos.\n");
-	        return;
-	    }
+	if(!f){
+		cout << "No se pudo abrir el archivo: " << archivo;
+		return;
+	}
 	
-	    struct RegCorredores reg;
+	RegCorredores reg;
 	
-	    while (fread(&reg, sizeof(struct RegCorredores), 1, archivoBin) == 1) {
-	        fprintf(archivoTxt,
-	            "Numero: %d | Nombre y Apellido: %-40s | Categoria: %-50s | Genero: %c | Localidad: %-25s | Llegada: %-10s\n",
-	            reg.numero, reg.nombreApellido, reg.categoria, reg.genero,
-	            reg.localidad, reg.llegada);
-	            
-	        /* fprintf(archivoTxt,
-	            "PosGral: %3d | PosGenero: %3d | PosCategoria: %3d | Número: %4d | NombreApellido: %-50s | Categoría: %-20s | Género: %c | Localidad: %-30s | Llegada: %-10s | DifPrimero: %-10s | DifAnterior: %-10s\n",
-	            reg.posGral, reg.posGenero, reg.posCategoria, reg.numero,
-	            reg.nombreApellido, reg.categoria, reg.genero,
-	            reg.localidad, reg.llegada, reg.difPrimero, reg.difAnterior); */
-	    }
-			fclose(archivoBin);
-		    fclose(archivoTxt);
-	    printf("Archivo de texto generado correctamente.\n");
+	while(fread(&reg, sizeof(RegCorredores), 1, f) == 1){
+		cout << "Numero: " << reg.numero << " | ";
+		printf("%-48s  | ", reg.categoria); 
+		cout << "Genero: " << reg.genero;
+		cout << endl;
+	}
+	
+	fclose(f);
 }
 
-//Funcion que crea 2 archivos y los separa por cada categoria
-void SepararPorCategoria(const char* archivoentrada,const char* archivocategoria1,const char* archivocategoria2){
-	RegCorredores Actual;
-    FILE* entrada = fopen(archivoentrada,"rb");
-    
-    if(!entrada){
-    	cout << "El archivo no pudo leerse correctamente";
-    	return;
-	}
-	
-	FILE* categoria1 = fopen(archivocategoria1, "wb");
-	
-	if(!categoria1){
-    	cout << " El archivo no pudo crearse correctamente";
-    	return;
-	}
-	
-	FILE* categoria2 = fopen(archivocategoria2, "wb");
-	
-		if(!categoria2){
-    	cout << " El archivo no pudo crearse correctamente";
-    	return;
-	}
-    
-    while (fread(&Actual, sizeof(RegCorredores), 1, entrada) == 1)	{
-	    	if(strncmp(Actual.categoria, "4 Refugios Clasica", 18 ) == 0){	
-		    		fwrite(&Actual, sizeof(RegCorredores), 1, categoria1);
-				}
-			else{
-					fwrite(&Actual, sizeof(RegCorredores), 1, categoria2);
-				}
-	}
-		
-	fclose(entrada); 
-	fclose(categoria1);
-	fclose(categoria2);
+void cargarCorredoresVector(FILE *archivo, RegCorredores regCorredoresV[], int &longitud){
+	longitud = 0;
+    RegCorredores temp;
+
+    while (fread(&temp, sizeof(RegCorredores), 1, archivo) == 1) {
+        regCorredoresV[longitud] = temp;
+        longitud++;
+    }
+}
+
+void leerVectorCorredores(RegCorredores regCorredores[], int longitud){
+	for (int i = 0; i < longitud; i++) {
+        cout << "-----------------------------" << endl;
+        cout << "Corredor #" << i + 1 << endl; //contador
+        cout << "Numero: " << regCorredores[i].numero << endl;
+        cout << "Nombre y Apellido: " << regCorredores[i].nombreApellido << endl;
+        cout << "Categoria: " << regCorredores[i].categoria << endl;
+        cout << "Genero: " << regCorredores[i].genero << endl;
+        cout << "Localidad: " << regCorredores[i].localidad << endl;
+        cout << "Horario de llegada: " << regCorredores[i].llegada << endl;
+    }
+    cout << "-----------------------------" << endl;
 }
