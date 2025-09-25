@@ -49,6 +49,7 @@ void leerVectorCorredores(RegCorredores [], int);
 void OrdenarPorTiempo (RegCorredores vector[],int longitud);
 void calcularPosiciones(ReporteCorredores[] , int );
 void cargarArchivoConVector(RegCorredores [], int longitud, FILE *archivoSalida);
+void leerReporte(ReporteCorredores[], int);
 
 int main() {
 	char rutaEntrada[] = "Archivo corredores 4Refugios.bin";
@@ -348,3 +349,25 @@ void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
         reporte[i].posCategoria = rankingCat;
     }
 }
+
+void leerReporte(ReporteCorredores reporte[], int longitud) {
+	printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+    printf("PosGral | PosGen | PosCat | Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    | DifPrimero | DifAnterior\n");
+    printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < longitud; i++) {
+        printf("%7d | %6d | %6d | %6d | %-37s | %-48s |   %c    | %-18s | %-10s | %-10s | %-10s\n",
+               reporte[i].posGral,
+               reporte[i].posGenero,
+               reporte[i].posCategoria,
+               reporte[i].numero,
+               reporte[i].nombreApellido,
+               reporte[i].categoria,
+               reporte[i].genero,
+               reporte[i].localidad,
+               reporte[i].llegada,
+               reporte[i].difPrimero,
+               reporte[i].difAnterior);
+    }
+}
+
