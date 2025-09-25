@@ -47,6 +47,7 @@ void leerArchivoConsola(char *);
 void cargarCorredoresVector(FILE *, RegCorredores [], int&);
 void leerVectorCorredores(RegCorredores [], int);
 void OrdenarPorTiempo (RegCorredores vector[],int longitud);
+void calcularPosiciones(ReporteCorredores[] , int );
 int main() {
 	char rutaEntrada[] = "Archivo corredores 4Refugios.bin";
     char rutaCategoria1[] = "categoria1.bin";
@@ -304,4 +305,30 @@ void CambioStruct (RegCorredores vector1[],int longitud1, ReporteCorredores vect
 		strcpy(vector2[i].difPrimero, "--:--:--.-");
 		strcpy(vector2[i].difAnterior, "--:--:--.-");
 	}
+}
+
+void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
+
+    for (int i=0; i<longitud; i++) {
+        // Posición general
+        reporte[i].posGral = i+1;
+
+        // Posición por género
+        int rankingGenero = 1;
+        for (int j=0; j<i; j++) {
+            if (reporte[j].genero == reporte[i].genero) {
+                rankingGenero++;
+            }
+        }
+        reporte[i].posGenero = rankingGenero;
+
+        // Posición por categoría
+        int rankingCat = 1;
+        for (int j=0; j<i; j++) {
+            if (strcmp(reporte[j].categoria, reporte[i].categoria) == 0) {
+                rankingCat++;
+            }
+        }
+        reporte[i].posCategoria = rankingCat;
+    }
 }
