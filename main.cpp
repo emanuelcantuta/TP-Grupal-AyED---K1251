@@ -49,6 +49,7 @@ void leerVectorCorredores(RegCorredores [], int);
 void OrdenarPorTiempo (RegCorredores vector[],int longitud);
 void calcularPosiciones(ReporteCorredores[] , int );
 void cargarArchivoConVector(RegCorredores [], int longitud, FILE *archivoSalida);
+void noTermino(RegCorredores [], int longitud);
 void leerReporte(ReporteCorredores[], int);
 
 int main() {
@@ -78,8 +79,10 @@ int main() {
 	//leerVectorCorredores(regCorredoresV, longitud);
 
 	//funcional
+	noTermino(regCorredoresV, longitud);
 	OrdenarPorTiempo (regCorredoresV,longitud);
 	separarEnVectoresPorCarrera(regCorredoresV, longitud, categoria1V, longitud1, categoria2V,longitud2);
+	
 	leerVectorCorredores(categoria1V,longitud1);
 	leerVectorCorredores(categoria2V,longitud2);
 	
@@ -128,6 +131,17 @@ int main() {
 }
 */
  
+void noTermino(RegCorredores vectorEntrada[], int longitud){
+	
+	for (int i=0; i < longitud; i++)
+	{	
+		if (strncmp(vectorEntrada[i].llegada, "DNF", 3) == 0 ||	strncmp(vectorEntrada[i].llegada, "DSQ", 3) == 0 )
+		{
+			strcpy(vectorEntrada[i].llegada, "No termino");
+		}
+	}	
+}
+
 void cargarArchivoConVector(RegCorredores vectorEntrada[], int longitud, FILE *archivoSalida){
 	 
 	for (int i=0; i < longitud; i++)
@@ -370,4 +384,3 @@ void leerReporte(ReporteCorredores reporte[], int longitud) {
                reporte[i].difAnterior);
     }
 }
-
