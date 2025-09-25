@@ -105,7 +105,7 @@ int main() {
 	cout << "Archivo Categoria NonStop" << endl;
 	leerArchivoConsola(rutaCategoria2);
 
-	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún)
+	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún, Base ESTRUCTURA PARA EL REPORTE)
 	cambioStruct(categoria1V,longitud1,reporte1V);
 	cambioStruct(categoria2V,longitud2,reporte2V);
 
@@ -307,3 +307,4 @@ void leerArchivoConsola(const char* ruta){
     }
     fclose(f);
 }
+
