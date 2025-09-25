@@ -48,12 +48,13 @@ void cargarCorredoresVector(FILE *, RegCorredores [], int&);
 void leerVectorCorredores(RegCorredores [], int);
 void OrdenarPorTiempo (RegCorredores vector[],int longitud);
 void calcularPosiciones(ReporteCorredores[] , int );
+void cargarArchivoConVector(RegCorredores [], int longitud, FILE *archivoSalida);
+
 int main() {
 	char rutaEntrada[] = "Archivo corredores 4Refugios.bin";
     char rutaCategoria1[] = "categoria1.bin";
     char rutaCategoria2[] = "categoria2.bin";
     int longitud = 1000;
-
 
 	RegCorredores regCorredoresV[longitud];
 	RegCorredores categoria1V[longitud]; int longitud1 = 0;
@@ -61,7 +62,6 @@ int main() {
 
 	ReporteCorredores reporte1V[longitud];
 	ReporteCorredores reporte2V[longitud];
-
 
 	FILE* entrada = fopen(rutaEntrada, "rb");
     FILE* categoria1 = fopen(rutaCategoria1, "wb");
@@ -76,12 +76,15 @@ int main() {
 	cargarCorredoresVector(entrada, regCorredoresV, longitud);
 	//leerVectorCorredores(regCorredoresV, longitud);
 
-
 	//funcional
 	OrdenarPorTiempo (regCorredoresV,longitud);
 	separarEnVectoresPorCarrera(regCorredoresV, longitud, categoria1V, longitud1, categoria2V,longitud2);
 	leerVectorCorredores(categoria1V,longitud1);
 	leerVectorCorredores(categoria2V,longitud2);
+	
+	//Cargo los archivos mediante los vectores de las 2 categorias
+	cargarArchivoConVector(categoria1V, longitud, categoria1);
+	cargarArchivoConVector(categoria2V, longitud, categoria2);	
 
 	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores
 	CambioStruct(categoria1V,longitud1,reporte1V);
@@ -94,16 +97,18 @@ int main() {
 	cout << "Archivo Categoria NonStop" << endl;
 	leerArchivoConsola(rutaCategoria2);
 
-
 	//cierre de archivos
     fclose(entrada);
     fclose(categoria1);
     fclose(categoria2);
+    
 	BinToTxt("categoria1.bin","categoria1.txt");
 	BinToTxt("categoria2.bin","categoria2.txt");
+	
+	
+	
 	return 0;
 }
-
 
 
 /* SEPARA VECTOR ORIGINAL EN ARCHIVOS
@@ -121,6 +126,16 @@ int main() {
 	}
 }
 */
+ 
+void cargarArchivoConVector(RegCorredores vectorEntrada[], int longitud, FILE *archivoSalida){
+	 
+	for (int i=0; i < longitud; i++)
+	{	
+		  		fwrite(&vectorEntrada[i], sizeof(RegCorredores), 1, archivoSalida);
+	}
+	
+}
+
 
 void separarEnVectoresPorCarrera(RegCorredores vectorCorredores[], int longitud, RegCorredores categoria1[], int &long1, RegCorredores categoria2[], int &long2){
 	long1 = 0;
@@ -139,6 +154,7 @@ void separarEnVectoresPorCarrera(RegCorredores vectorCorredores[], int longitud,
 
 	}
 }
+
 float horarioASegundos(char horario[], int longitud){
 	float totalSegundos = 0.0;
 
