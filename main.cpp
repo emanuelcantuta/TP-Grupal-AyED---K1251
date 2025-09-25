@@ -78,8 +78,9 @@ int main() {
         return 1;
     }
 
-	noTermino(regCorredoresV, longitud);
+
 	cargarCorredoresVector(entrada, regCorredoresV, longitud);
+	noTermino(regCorredoresV, longitud);
 	ordenarPorTiempo(regCorredoresV,longitud);
 	
 	separarEnVectoresPorCarrera(regCorredoresV, longitud, categoria1V, longitud1, categoria2V,longitud2);
@@ -108,6 +109,16 @@ int main() {
 	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún, Base ESTRUCTURA PARA EL REPORTE)
 	cambioStruct(categoria1V,longitud1,reporte1V);
 	cambioStruct(categoria2V,longitud2,reporte2V);
+ 	
+	calcularPosiciones(reporte1V , longitud1);
+	calcularPosiciones(reporte2V , longitud2);
+
+	//falta funcion de tiempos
+	
+	
+	//
+	imprimirReporte(reporte1V, longitud1);
+	imprimirReporte(reporte2V, longitud2);
 
 	//cierre de archivos
     fclose(entrada);
@@ -142,7 +153,7 @@ float horarioASegundos(char horario[], int longitud){
     + ((horario[6]-'0')*10 + (horario[7]-'0'))
     + (static_cast<float>(horario[9]-'0'))/10;
 
-    return totalSegundos;
+    return totalSegundos
 }
 
 void segundosAHorario(float totalSegundos, char* resultado) {
@@ -272,7 +283,7 @@ void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
     }
 }
 
-void leerReporte(ReporteCorredores reporte[], int longitud){
+void imprimirReporte(ReporteCorredores reporte[], int longitud){
 	printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
     printf("PosGral | PosGen | PosCat | Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    | DifPrimero | DifAnterior\n");
     printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
@@ -307,4 +318,5 @@ void leerArchivoConsola(const char* ruta){
     }
     fclose(f);
 }
+
 
