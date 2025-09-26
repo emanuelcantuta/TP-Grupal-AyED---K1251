@@ -51,7 +51,7 @@ void leerArchivoConsola(const char *);
 
 //pasar a vector para trabajar en él y leer (prueba)
 void leerVectorCorredores(RegCorredores [], int);
-
+void calcularTiempos(ReporteCorredores[], int);
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
 	const char rutaCiudades [] = "Ciudades.bin";
@@ -114,8 +114,8 @@ int main() {
 	calcularPosiciones(reporte2V , longitud2);
 
 	//falta funcion de tiempos
-	
-	
+	void calcularTiempos(reporte1V, longitud1);
+	void calcularTiempos(reporte2V, longitud2);
 	//
 	imprimirReporte(reporte1V, longitud1);
 	imprimirReporte(reporte2V, longitud2);
@@ -317,6 +317,29 @@ void leerArchivoConsola(const char* ruta){
         cout << "Genero: " << reg.genero << endl;
     }
     fclose(f);
+}
+
+void calcularTiempos(ReporteCorredores reporte[], int longitud){
+	float aux;
+	for(int i = 1; i<longitud; i++){
+		
+		if(strcmp(reporte[i].llegada, "No termino") == 0){
+			
+		strcpy(reporte[i].difPrimero, "--:--:--.-");
+		strcpy(reporte[i].difAnterior, "--:--:--.-");
+		
+		return;
+		}
+	
+	aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[i-1].llegada);
+	char buffer[20];
+	segundosAHorario(aux, buffer);
+	strcpy(reporte[i].difAnterior, buffer);
+	
+	aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[0].llegada);
+	segundosAHorario(aux, buffer);
+	strcpy(reporte[i].difPrimero, buffer);
+}
 }
 
 
