@@ -35,7 +35,7 @@ struct ReporteCorredores{
 
 //prototipos
 void cargarCorredoresVector(FILE *, RegCorredores [], int&);
-float horarioASegundos(char [], int);
+float horarioASegundos(char []);
 void segundosAHorario(float, char *);
 void ordenarPorTiempo (RegCorredores [], int);
 void separarEnVectoresPorCarrera(RegCorredores [], int, RegCorredores [], int&, RegCorredores [], int&);
@@ -44,7 +44,7 @@ void separarPorCarrera(RegCorredores [], int, FILE *, FILE *);
 int compararTiempos (float , float );
 void cambioStruct (RegCorredores [], int, ReporteCorredores []);
 void calcularPosiciones(ReporteCorredores [] , int);
-void leerReporte(ReporteCorredores [], int);
+void imprimirReporte(ReporteCorredores [], int);
 void noTermino(RegCorredores [], int longitud);
 //funcion para leer
 void leerArchivoConsola(const char *);
@@ -114,8 +114,8 @@ int main() {
 	calcularPosiciones(reporte2V , longitud2);
 
 	//falta funcion de tiempos
-	void calcularTiempos(reporte1V, longitud1);
-	void calcularTiempos(reporte2V, longitud2);
+	calcularTiempos(reporte1V, longitud1);
+	calcularTiempos(reporte2V, longitud2);
 	//
 	imprimirReporte(reporte1V, longitud1);
 	imprimirReporte(reporte2V, longitud2);
@@ -145,7 +145,7 @@ void cargarCorredoresVector(FILE *archivo, RegCorredores regCorredoresV[], int &
     }
 }
 
-float horarioASegundos(char horario[], int longitud){
+float horarioASegundos(char horario[]){
 	float totalSegundos = 0.0;
 
 	totalSegundos = ((horario[0]-'0')*10 + (horario[1]-'0')) * 3600
@@ -153,7 +153,7 @@ float horarioASegundos(char horario[], int longitud){
     + ((horario[6]-'0')*10 + (horario[7]-'0'))
     + (static_cast<float>(horario[9]-'0'))/10;
 
-    return totalSegundos
+    return totalSegundos;
 }
 
 void segundosAHorario(float totalSegundos, char* resultado) {
@@ -187,8 +187,8 @@ void ordenarPorTiempo (RegCorredores vector[],int longitud){
 	for (int i = 0; i < longitud - 1; i++){
 
 		for (int j = 0;j<longitud - i - 1;j++){
-			tiempo1 = horarioASegundos(vector[j].llegada,11);
-			tiempo2 = horarioASegundos(vector[j+1].llegada,11);
+			tiempo1 = horarioASegundos(vector[j].llegada);
+			tiempo2 = horarioASegundos(vector[j+1].llegada);
 
 			if (tiempo1>tiempo2){
 				aux = vector[j];
@@ -341,5 +341,6 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 	strcpy(reporte[i].difPrimero, buffer);
 }
 }
+
 
 
