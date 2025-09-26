@@ -159,26 +159,27 @@ float horarioASegundos(char horario[]){
 }
 
 void segundosAHorario(float totalSegundos, char* resultado) {
-	totalSegundos *= 10;
-	int aux = totalSegundos;
+	int decimales = (int)(totalSegundos * 10); //totalSegundos * 10 + 0.5 (para redondear)
 
-	int horasAux = aux / 36000;
-    int minAux = aux % 36000;
-    int segAux = minAux % 600;
-    minAux = minAux / 600;
-    int decAux = segAux % 10;
-    segAux = segAux / 10;
+    int horas = decimales / 36000;
+    int restoHoras = decimales % 36000;
 
-    resultado[0] = (horasAux / 10) + 48;
-    resultado[1] = (horasAux % 10) + 48;
+    int minutos = restoHoras / 600;
+    int restoMin = restoHoras % 600;
+
+    int segundos = restoMin / 10;
+    int decimal = restoMin % 10;
+
+    resultado[0] = (horas / 10) + '0';
+    resultado[1] = (horas % 10) + '0';
     resultado[2] = ':';
-    resultado[3] = (minAux / 10) + 48;
-    resultado[4] = (minAux % 10) + 48;
+    resultado[3] = (minutos / 10) + '0';
+    resultado[4] = (minutos % 10) + '0';
     resultado[5] = ':';
-    resultado[6] = (segAux / 10) + 48;
-    resultado[7] = (segAux % 10) + 48;
+    resultado[6] = (segundos / 10) + '0';
+    resultado[7] = (segundos % 10) + '0';
     resultado[8] = '.';
-    resultado[9] = decAux + 48;
+    resultado[9] = decimal + '0';
     resultado[10] = '\0';
 }
 
@@ -341,5 +342,3 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 		strcpy(reporte[i].difPrimero, buffer);
 	}
 }
-
-
