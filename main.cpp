@@ -43,15 +43,18 @@ void cargarArchivoConVector(RegCorredores [], int, FILE *);
 void separarPorCarrera(RegCorredores [], int, FILE *, FILE *);
 int compararTiempos (float , float );
 void cambioStruct (RegCorredores [], int, ReporteCorredores []);
+void ordenarPorCategoriaIguales(ReporteCorredores [] , int);
 void calcularPosiciones(ReporteCorredores [] , int);
 void imprimirReporte(ReporteCorredores [], int);
-void noTermino(RegCorredores [], int longitud);
+void noTermino(RegCorredores [], int);
 //funcion para leer
 void leerArchivoConsola(const char *);
 
 //pasar a vector para trabajar en él y leer (prueba)
 void leerVectorCorredores(RegCorredores [], int);
 void calcularTiempos(ReporteCorredores[], int);
+
+
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
 	const char rutaCiudades [] = "Ciudades.bin";
@@ -114,6 +117,10 @@ int main() {
 	cambioStruct(categoria1V,longitud1,reporte1V);
 	cambioStruct(categoria2V,longitud2,reporte2V);
  	
+ 	//ordenarPorcategoria
+ 	ordenarPorCategoriaIguales(reporte1V, longitud1);
+ 	ordenarPorCategoriaIguales(reporte2V, longitud2);
+ 	
 	calcularPosiciones(reporte1V , longitud1);
 	calcularPosiciones(reporte2V , longitud2);
 
@@ -159,7 +166,7 @@ float horarioASegundos(char horario[]){
 }
 
 void segundosAHorario(float totalSegundos, char* resultado) {
-	int decimales = (int)(totalSegundos * 10); //totalSegundos * 10 + 0.5 (para redondear)
+	int decimales = (int)(totalSegundos * 10); // 
 
     int horas = decimales / 36000;
     int restoHoras = decimales % 36000;
@@ -262,6 +269,20 @@ void cambioStruct (RegCorredores vector1[],int longitud1, ReporteCorredores vect
 	}
 }
 
+void ordenarPorCategoriaIguales(ReporteCorredores reporte[] , int longitud){
+	ReporteCorredores aux;
+
+    for (int i = 0; i < longitud - 1; i++) {
+        for (int j = 0; j < longitud - i - 1; j++) {
+            if (strcmp(reporte[j].categoria, reporte[j + 1].categoria) > 0) {
+                aux = reporte[j];
+                reporte[j] = reporte[j + 1];
+                reporte[j + 1] = aux;
+            }
+        }
+    }
+}
+
 void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
     for (int i=0; i<longitud; i++) {
         // Posición general
@@ -276,9 +297,9 @@ void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
         }
         reporte[i].posGenero = rankingGenero;
 
-        // Posición por categoría
+        // Posición por categoría, para contar debe estar previamente ordenado por categoria
         int rankingCat = 1;
-        for (int j=0; j<i; j++) {
+        for (int j = 0; j < i; j++) {
             if (strcmp(reporte[j].categoria, reporte[i].categoria) == 0) {
                 rankingCat++;
             }
