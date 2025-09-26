@@ -331,7 +331,7 @@ void generarReportePorCarreras(const char* ruta1, const char* ruta2, ReporteCorr
 	}
 	
 	fwrite(reporte1, sizeof(ReporteCorredores), longitud1, r1);
-	fwrite(reporte2, sizeof(ReporteCorredores), longitud1, r2);
+	fwrite(reporte2, sizeof(ReporteCorredores), longitud2, r2);
 	
 	fclose(r1);
 	fclose(r2);
@@ -371,3 +371,4 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 		strcpy(reporte[i].difPrimero, buffer);
 	}
 }
+
