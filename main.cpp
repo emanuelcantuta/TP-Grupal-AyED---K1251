@@ -43,7 +43,7 @@ void cargarArchivoConVector(RegCorredores [], int, FILE *);
 void separarPorCarrera(RegCorredores [], int, FILE *, FILE *);
 int compararTiempos(float , float );
 void inicializarReporte(RegCorredores [], int, ReporteCorredores []);
-void ordenarPorCategoriaIguales(ReporteCorredores [] , int);
+
 void calcularPosiciones(ReporteCorredores [] , int);
 void imprimirReporte(ReporteCorredores [], int);
 void noTermino(RegCorredores [], int);
@@ -122,10 +122,6 @@ int main() {
 	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún, Base ESTRUCTURA PARA EL REPORTE)
 	inicializarReporte(categoria1V,longitud1,reporte1V);
 	inicializarReporte(categoria2V,longitud2,reporte2V);
- 	
- 	//ordenarPorcategoria
- 	ordenarPorCategoriaIguales(reporte1V, longitud1);
- 	ordenarPorCategoriaIguales(reporte2V, longitud2);
  	
 	calcularPosiciones(reporte1V , longitud1);
 	calcularPosiciones(reporte2V , longitud2);
@@ -272,25 +268,11 @@ void inicializarReporte(RegCorredores vector1[],int longitud1, ReporteCorredores
 		strcpy(vector2[i].categoria, vector1[i].categoria);
 		vector2[i].genero = vector1[i].genero;
 		strcpy(vector2[i].localidad, vector1[i].localidad);
-		strcpy(vector2[i].llegada, vector1[i].llegada);
+		strcpy(vector2[i].llegada, vector1[i].llegada); //mover
 
 		strcpy(vector2[i].difPrimero, "--:--:--.-");
 		strcpy(vector2[i].difAnterior, "--:--:--.-");
 	}
-}
-
-void ordenarPorCategoriaIguales(ReporteCorredores reporte[] , int longitud){
-	ReporteCorredores aux;
-
-    for (int i = 0; i < longitud - 1; i++) {
-        for (int j = 0; j < longitud - i - 1; j++) {
-            if (strcmp(reporte[j].categoria, reporte[j + 1].categoria) > 0) {
-                aux = reporte[j];
-                reporte[j] = reporte[j + 1];
-                reporte[j + 1] = aux;
-            }
-        }
-    }
 }
 
 void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
