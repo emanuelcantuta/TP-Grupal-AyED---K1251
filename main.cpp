@@ -41,12 +41,16 @@ void ordenarPorTiempo (RegCorredores [], int);
 void separarEnVectoresPorCarrera(RegCorredores [], int, RegCorredores [], int&, RegCorredores [], int&);
 void cargarArchivoConVector(RegCorredores [], int, FILE *);
 void separarPorCarrera(RegCorredores [], int, FILE *, FILE *);
-int compararTiempos (float , float );
-void cambioStruct (RegCorredores [], int, ReporteCorredores []);
+int compararTiempos(float , float );
+void inicializarReporte(RegCorredores [], int, ReporteCorredores []);
 void ordenarPorCategoriaIguales(ReporteCorredores [] , int);
 void calcularPosiciones(ReporteCorredores [] , int);
 void imprimirReporte(ReporteCorredores [], int);
 void noTermino(RegCorredores [], int);
+
+//genera 2 archivos binario del reporte de los corredores por Clasica y NonStop
+void generarReportePorCarreras(const char *, const char *, ReporteCorredores [], int, ReporteCorredores [], int);
+
 //funcion para leer
 void leerArchivoConsola(const char *);
 
@@ -60,6 +64,8 @@ int main() {
 	const char rutaCiudades [] = "Ciudades.bin";
 	const char rutaCategoria1 [] = "categoria1.bin";
 	const char rutaCategoria2 [] = "categoria2.bin";
+	const char rutaReporteCarrera1 [] = "reporteCarreraClasica.bin";
+	const char rutaReporteCarrera2 [] = "reporteCarreraNonStop.bin";
 	
     int longitud = 1000; //longitud base general
 	int longitud1 = 0; //longitud para vector Clasica
@@ -114,8 +120,8 @@ int main() {
 	leerArchivoConsola(rutaCategoria2);
 
 	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún, Base ESTRUCTURA PARA EL REPORTE)
-	cambioStruct(categoria1V,longitud1,reporte1V);
-	cambioStruct(categoria2V,longitud2,reporte2V);
+	inicializarReporte(categoria1V,longitud1,reporte1V);
+	inicializarReporte(categoria2V,longitud2,reporte2V);
  	
  	//ordenarPorcategoria
  	ordenarPorCategoriaIguales(reporte1V, longitud1);
@@ -127,9 +133,13 @@ int main() {
 	//falta funcion de tiempos
 	calcularTiempos(reporte1V, longitud1);
 	calcularTiempos(reporte2V, longitud2);
-	//
+	
+	//imprime por consola
 	imprimirReporte(reporte1V, longitud1);
 	imprimirReporte(reporte2V, longitud2);
+	
+	//genera archivo reporte
+	generarReportePorCarreras(rutaReporteCarrera1, rutaReporteCarrera2, reporte1V, longitud1, reporte2V, longitud2);
 
 	fclose(categoria1);
     fclose(categoria2);	
@@ -251,7 +261,7 @@ int compararTiempos (float tiempoReferencia, float tiempoActual){
 	return diferencia;
 }
 
-void cambioStruct (RegCorredores vector1[],int longitud1, ReporteCorredores vector2[]){
+void inicializarReporte(RegCorredores vector1[],int longitud1, ReporteCorredores vector2[]){ //base de la estructura de REPORTECORREDORES 
 	for (int i = 0; i < longitud1; i++){
 		vector2[i].posGral = i;
 		vector2[i].posCategoria = -1; // Reemplazar por funcion?
@@ -313,7 +323,7 @@ void imprimirReporte(ReporteCorredores reporte[], int longitud){
     printf("PosGral | PosGen | PosCat | Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    | DifPrimero | DifAnterior\n");
     printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
 
-    for (int i = 0; i < longitud; i++) {
+    for(int i = 0; i < longitud; i++) {
         printf("%7d | %6d | %6d | %6d | %-37s | %-48s |   %c    | %-18s | %-10s | %-10s | %-10s\n",
                reporte[i].posGral,
                reporte[i].posGenero,
@@ -327,6 +337,22 @@ void imprimirReporte(ReporteCorredores reporte[], int longitud){
                reporte[i].difPrimero,
                reporte[i].difAnterior);
     }
+}
+
+void generarReportePorCarreras(const char* ruta1, const char* ruta2, ReporteCorredores reporte1[], int longitud1, ReporteCorredores reporte2[], int longitud2){
+	FILE* r1 = fopen(ruta1, "wb");
+	FILE* r2 = fopen(ruta2, "wb");
+	
+	if(!r1 || !r2){
+		cout << "No se pudo crear el archivo final del reporteCorredores" << endl;
+        return;
+	}
+	
+	fwrite(reporte1, sizeof(ReporteCorredores), longitud1, r1);
+	fwrite(reporte2, sizeof(ReporteCorredores), longitud1, r2);
+	
+	fclose(r1);
+	fclose(r2);
 }
 
 void leerArchivoConsola(const char* ruta){
