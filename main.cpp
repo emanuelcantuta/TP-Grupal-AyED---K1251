@@ -78,7 +78,6 @@ int main() {
         return 1;
     }
 
-
 	cargarCorredoresVector(entrada, regCorredoresV, longitud);
 	noTermino(regCorredoresV, longitud);
 	ordenarPorTiempo(regCorredoresV,longitud);
@@ -94,6 +93,11 @@ int main() {
 	//Cargo los archivos mediante los vectores de las 2 categorias
 	cargarArchivoConVector(categoria1V, longitud1, categoria1);
 	cargarArchivoConVector(categoria2V, longitud2, categoria2);	
+	
+	//cierre de archivos, cerrando los archivos porque ya se pasaron a un vector
+    fclose(entrada);
+    fclose(categoria1);
+    fclose(categoria2);
 	
 	//cambiandolo a modo lectura para que se pueda leer 
 	categoria1 = fopen(rutaCategoria1, "rb");
@@ -120,10 +124,8 @@ int main() {
 	imprimirReporte(reporte1V, longitud1);
 	imprimirReporte(reporte2V, longitud2);
 
-	//cierre de archivos
-    fclose(entrada);
-    fclose(categoria1);
-    fclose(categoria2);
+	fclose(categoria1);
+    fclose(categoria2);	
 	return 0;
 }
 
@@ -236,7 +238,8 @@ void cargarArchivoConVector(RegCorredores vectorEntrada[], int longitud, FILE *a
 }
 
 int compararTiempos (float tiempoReferencia, float tiempoActual){
-	int diferencia = tiempoReferencia - tiempoActual;
+	int diferencia = 0;
+	diferencia = tiempoReferencia - tiempoActual;
 	return diferencia;
 }
 
@@ -321,26 +324,22 @@ void leerArchivoConsola(const char* ruta){
 
 void calcularTiempos(ReporteCorredores reporte[], int longitud){
 	float aux;
-	for(int i = 1; i<longitud; i++){
-		
+	for(int i = 1; i<longitud; i++){	
 		if(strcmp(reporte[i].llegada, "No termino") == 0){
+			strcpy(reporte[i].difPrimero, "--:--:--.-");
+			strcpy(reporte[i].difAnterior, "--:--:--.-");
 			
-		strcpy(reporte[i].difPrimero, "--:--:--.-");
-		strcpy(reporte[i].difAnterior, "--:--:--.-");
-		
-		return;
+			return;
 		}
-	
-	aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[i-1].llegada);
-	char buffer[20];
-	segundosAHorario(aux, buffer);
-	strcpy(reporte[i].difAnterior, buffer);
-	
-	aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[0].llegada);
-	segundosAHorario(aux, buffer);
-	strcpy(reporte[i].difPrimero, buffer);
+		aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[i-1].llegada);
+		char buffer[20];
+		segundosAHorario(aux, buffer);
+		strcpy(reporte[i].difAnterior, buffer);
+		
+		aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[0].llegada);
+		segundosAHorario(aux, buffer);
+		strcpy(reporte[i].difPrimero, buffer);
+	}
 }
-}
-
 
 
