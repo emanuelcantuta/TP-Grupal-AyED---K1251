@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+#include <vector>
 
 using namespace std;
 
@@ -32,6 +33,10 @@ struct ReporteCorredores{
 	char difPrimero[11];
 	char difAnterior[11];
 };
+
+//probando
+void EncontrarCategorias (RegCorredores vectorCorredores[],int longitudVector); // usar categoria1V[] y categoria2V[]
+void ImprimirPodio (int cantImpresiones, RegCorredores vectorARecorrer[], int recorrerDesde, int recorrerHasta, char categoriaBuscada[][50], int posicionBuscada);
 
 //prototipos
 void cargarCorredoresVector(FILE *, RegCorredores [], int&);
@@ -66,14 +71,15 @@ int main() {
 	const char rutaCategoria2 [] = "categoria2.bin";
 	const char rutaReporteCarrera1 [] = "reporteCarreraClasica.bin";
 	const char rutaReporteCarrera2 [] = "reporteCarreraNonStop.bin";
-	
+
+
     int longitud = 1000; //longitud base general
 	int longitud1 = 0; //longitud para vector Clasica
 	int longitud2 = 0; //longitud para vector NonStop
-	
+
 	RegCorredores regCorredoresV[longitud];
-	RegCorredores categoria1V[longitud]; 
-	RegCorredores categoria2V[longitud]; 
+	RegCorredores categoria1V[longitud];
+	RegCorredores categoria2V[longitud];
 
 	ReporteCorredores reporte1V[longitud];
 	ReporteCorredores reporte2V[longitud];
@@ -90,7 +96,7 @@ int main() {
 	cargarCorredoresVector(entrada, regCorredoresV, longitud);
 	noTermino(regCorredoresV, longitud);
 	ordenarPorTiempo(regCorredoresV,longitud);
-	
+
 	separarEnVectoresPorCarrera(regCorredoresV, longitud, categoria1V, longitud1, categoria2V,longitud2);
 	cout << "Vector Categoria Clasica" << endl;
 	leerVectorCorredores(categoria1V,longitud1); //categoria: 4 Refugios Clasica
@@ -101,17 +107,17 @@ int main() {
 
 	//Cargo los archivos mediante los vectores de las 2 categorias
 	cargarArchivoConVector(categoria1V, longitud1, categoria1);
-	cargarArchivoConVector(categoria2V, longitud2, categoria2);	
-	
+	cargarArchivoConVector(categoria2V, longitud2, categoria2);
+
 	//cierre de archivos, cerrando los archivos porque ya se pasaron a un vector
     fclose(entrada);
     fclose(categoria1);
     fclose(categoria2);
-	
-	//cambiandolo a modo lectura para que se pueda leer 
+
+	//cambiandolo a modo lectura para que se pueda leer
 	categoria1 = fopen(rutaCategoria1, "rb");
 	categoria2 = fopen(rutaCategoria2, "rb");
-	
+
 	//ver si se creo y separo correctamente el archivo
 	cout << "Archivo Categoria Clasica" << endl;
 	leerArchivoConsola(rutaCategoria1);
@@ -122,32 +128,35 @@ int main() {
 	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún, Base ESTRUCTURA PARA EL REPORTE)
 	inicializarReporte(categoria1V,longitud1,reporte1V);
 	inicializarReporte(categoria2V,longitud2,reporte2V);
- 	
+
 	calcularPosiciones(reporte1V , longitud1);
 	calcularPosiciones(reporte2V , longitud2);
 
 	//falta funcion de tiempos
 	calcularTiempos(reporte1V, longitud1);
 	calcularTiempos(reporte2V, longitud2);
-	
+
 	//imprime por consola
 	imprimirReporte(reporte1V, longitud1);
 	imprimirReporte(reporte2V, longitud2);
-	
+
 	//genera archivo reporte
 	generarReportePorCarreras(rutaReporteCarrera1, rutaReporteCarrera2, reporte1V, longitud1, reporte2V, longitud2);
 
 	fclose(categoria1);
-    fclose(categoria2);	
+    fclose(categoria2);
+
+	cout << "\n\n\n\n\n\n\n\n\n EJECUTANDO FUNCION encontrarCategorias() \n\n";
+	EncontrarCategorias(categoria1V,longitud1);
 	return 0;
 }
 
 void noTermino(RegCorredores vectorEntrada[], int longitud){
-	for(int i = 0; i < longitud; i++){	
+	for(int i = 0; i < longitud; i++){
 		if (strncmp(vectorEntrada[i].llegada, "DNF", 3) == 0 ||	strncmp(vectorEntrada[i].llegada, "DSQ", 3) == 0 ){
 			strcpy(vectorEntrada[i].llegada, "No termino");
 		}
-	}	
+	}
 }
 
 void cargarCorredoresVector(FILE *archivo, RegCorredores regCorredoresV[], int &longitud){
@@ -172,7 +181,7 @@ float horarioASegundos(char horario[]){
 }
 
 void segundosAHorario(float totalSegundos, char* resultado) {
-	int decimales = (int)(totalSegundos * 10); // 
+	int decimales = (int)(totalSegundos * 10); //
 
     int horas = decimales / 36000;
     int restoHoras = decimales % 36000;
@@ -257,7 +266,7 @@ int compararTiempos (float tiempoReferencia, float tiempoActual){
 	return diferencia;
 }
 
-void inicializarReporte(RegCorredores vector1[],int longitud1, ReporteCorredores vector2[]){ //base de la estructura de REPORTECORREDORES 
+void inicializarReporte(RegCorredores vector1[],int longitud1, ReporteCorredores vector2[]){ //base de la estructura de REPORTECORREDORES
 	for (int i = 0; i < longitud1; i++){
 		vector2[i].posGral = i;
 		vector2[i].posCategoria = -1; // Reemplazar por funcion?
@@ -324,15 +333,15 @@ void imprimirReporte(ReporteCorredores reporte[], int longitud){
 void generarReportePorCarreras(const char* ruta1, const char* ruta2, ReporteCorredores reporte1[], int longitud1, ReporteCorredores reporte2[], int longitud2){
 	FILE* r1 = fopen(ruta1, "wb");
 	FILE* r2 = fopen(ruta2, "wb");
-	
+
 	if(!r1 || !r2){
 		cout << "No se pudo crear el archivo final del reporteCorredores" << endl;
         return;
 	}
-	
+
 	fwrite(reporte1, sizeof(ReporteCorredores), longitud1, r1);
 	fwrite(reporte2, sizeof(ReporteCorredores), longitud2, r2);
-	
+
 	fclose(r1);
 	fclose(r2);
 }
@@ -354,21 +363,91 @@ void leerArchivoConsola(const char* ruta){
 
 void calcularTiempos(ReporteCorredores reporte[], int longitud){
 	float aux;
-	for(int i = 1; i<longitud; i++){	
+	for(int i = 1; i<longitud; i++){
 		if(strcmp(reporte[i].llegada, "No termino") == 0){
 			strcpy(reporte[i].difPrimero, "--:--:--.-");
 			strcpy(reporte[i].difAnterior, "--:--:--.-");
-			
+
 			return;
 		}
 		aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[i-1].llegada);
 		char buffer[20];
 		segundosAHorario(aux, buffer);
 		strcpy(reporte[i].difAnterior, buffer);
-		
+
 		aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[0].llegada);
 		segundosAHorario(aux, buffer);
 		strcpy(reporte[i].difPrimero, buffer);
 	}
 }
 
+/*int buscarCategoria (char valorBuscado[], int posValorBuscado, RegCorredores vectorCarrera[],int longitudVector)
+{
+	for (int i=0;i<longitudVector;i++)
+	{
+		if (strcmp(vectorCarrera[i],valorBuscado[posValorBuscado]) == 0)
+			return posValorBuscado;
+	}
+	return -1;
+}
+*/
+void EncontrarCategorias (RegCorredores vectorCorredores[],int longitudVector) // usar categoria1V[] y categoria2V[]
+{
+	//COMENTARIO: Funcional, pero puedo mejorarla. Ahora voy a seguir trabajando sobre esto,
+	//Mejoras a implementar:
+	//-- Mostrar categorias de forma ordenada
+	//-- Mostrar PODIO similar a como se ve en la funcion imprimirReporte();
+
+	char categoriaLeida[longitudVector][50]; // Vector que almacena las categorias de forma unica
+	int cantCategorias = 0; // Inicializo en 0, aún no se separaron categorias
+
+	for (int i=0;i<longitudVector;i++)
+	{
+		bool yaLeido = false; // Se reinicia el valor a false porque aún no hizo comprobaciones
+
+		// Chequea el vector categeoriaLeida en busca de coincidencias
+		for (int j=0;j<cantCategorias;j++)
+		{
+			//Si encuentra una coincidencia, deja de buscar y pasa al siguiente valor.
+			if (strcmp(vectorCorredores[i].categoria,categoriaLeida[j])  == 0)
+			{
+				yaLeido = true;
+				break;
+			}
+		}
+
+		// Si llega al final del vector y no encontró coincidencias
+		//		1. La agrega al vector categoriaLeida;
+		//		2. Busca a imprime la cantidad de coincidencias buscadas (3 en este caso)
+		//		3. Incrementa en +1 la longitud del vector categoriaLeida.
+		if (!yaLeido)
+		{
+			strcpy(categoriaLeida[cantCategorias], vectorCorredores[i].categoria);
+			ImprimirPodio (3,vectorCorredores,i,longitudVector,categoriaLeida,cantCategorias);
+
+			cantCategorias++;
+		}
+	}
+}
+
+void ImprimirPodio (int cantImpresiones, RegCorredores vectorARecorrer[], int recorrerDesde, int recorrerHasta, char categoriaBuscada[][50], int posicionBuscada)
+{
+	int puesto = 0;
+	cout << "\n\n\n================= PODIO " << categoriaBuscada[posicionBuscada] << " =================\n";
+	for (int i = recorrerDesde; i<recorrerHasta;i++)
+	{
+		if (strcmp(vectorARecorrer[i].categoria, categoriaBuscada[posicionBuscada]) == 0 )
+		{
+			puesto++;
+			cout << "Puesto: " << puesto << endl
+			<< "Nombre: " <<  vectorARecorrer[i].nombreApellido << endl
+			<< "Genero: " <<  vectorARecorrer[i].genero << endl
+			<< "Ciudad: " <<  vectorARecorrer[i].localidad << endl
+			<< "Tiempo: " <<  vectorARecorrer[i].llegada << endl << endl;
+
+		}
+		if (puesto == cantImpresiones)
+			break;
+	}
+
+}
