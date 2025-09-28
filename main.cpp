@@ -2,6 +2,7 @@
 #include <cstring>
 #include <vector>
 
+
 using namespace std;
 
 struct RegCorredores {
@@ -34,10 +35,6 @@ struct ReporteCorredores{
 	char difAnterior[11];
 };
 
-//probando
-void EncontrarCategorias (RegCorredores vectorCorredores[],int longitudVector); // usar categoria1V[] y categoria2V[]
-void ImprimirPodio (int cantImpresiones, RegCorredores vectorARecorrer[], int recorrerDesde, int recorrerHasta, char categoriaBuscada[][50], int posicionBuscada);
-
 //prototipos
 void cargarCorredoresVector(FILE *, RegCorredores [], int&);
 float horarioASegundos(char []);
@@ -53,6 +50,10 @@ void calcularPosiciones(ReporteCorredores [] , int);
 void imprimirReporte(ReporteCorredores [], int);
 void noTermino(RegCorredores [], int);
 
+void crearVectorCategorias (RegCorredores vectorARecorrer[], int longitud, char categoriasEncontradas[][50], int &cantCategorias);
+void ordenarCategorias (char vectorAOrdenar [][50],int longitud);
+void crearVectorPodio (char vectorCategorias[][50],int cantCategorias, RegCorredores vectorARecorrer[], int longitud, RegCorredores vectorSalida[]);
+void lugarVacante(RegCorredores[],int posicion);
 //genera 2 archivos binario del reporte de los corredores por Clasica y NonStop
 void generarReportePorCarreras(const char *, const char *, ReporteCorredores [], int, ReporteCorredores [], int);
 
@@ -71,6 +72,7 @@ int main() {
 	const char rutaCategoria2 [] = "categoria2.bin";
 	const char rutaReporteCarrera1 [] = "reporteCarreraClasica.bin";
 	const char rutaReporteCarrera2 [] = "reporteCarreraNonStop.bin";
+	const char rutaPodios [] = "podios.bin";
 
 
     int longitud = 1000; //longitud base general
@@ -80,6 +82,7 @@ int main() {
 	RegCorredores regCorredoresV[longitud];
 	RegCorredores categoria1V[longitud];
 	RegCorredores categoria2V[longitud];
+	RegCorredores podiosV[longitud];
 
 	ReporteCorredores reporte1V[longitud];
 	ReporteCorredores reporte2V[longitud];
@@ -87,6 +90,7 @@ int main() {
 	FILE* entrada = fopen(rutaEntrada, "rb");
     FILE* categoria1 = fopen(rutaCategoria1, "wb");
     FILE* categoria2 = fopen(rutaCategoria2, "wb");
+
 
     if (!entrada || !categoria1 || !categoria2) {
         cout << "Error al abrir uno de los archivos.\n";
@@ -146,8 +150,41 @@ int main() {
 	fclose(categoria1);
     fclose(categoria2);
 
-	cout << "\n\n\n\n\n\n\n\n\n EJECUTANDO FUNCION encontrarCategorias() \n\n";
-	EncontrarCategorias(categoria1V,longitud1);
+	char vectorCategorias[longitud][50];
+	int aux = 0;
+	crearVectorCategorias(regCorredoresV,longitud,vectorCategorias,aux);
+
+	/*cout << "VECTOR CATEGORIAS: \n";
+	cout << "AUX: " << aux << endl;
+	for (int i=0;i<aux;i++)
+	{
+		cout << vectorCategorias[i] << endl;
+	}*/
+
+	ordenarCategorias(vectorCategorias,aux);
+	/*cout << "VECTOR CATEGORIAS ORDENADO: \n";
+	cout << "AUX: " << aux << endl;
+	for (int i=0;i<aux;i++)
+	{
+		cout << vectorCategorias[i] << endl;
+	}
+	*/
+
+	int longPodio = aux*3;
+	crearVectorPodio (vectorCategorias,aux,regCorredoresV,longitud,podiosV);
+	leerVectorCorredores(podiosV,longPodio);
+
+	FILE* podios = fopen(rutaPodios, "wb");
+	if (!podios) {
+		cout << "Error al crear archivo 'podios.bin'";
+		return 1;
+	}
+	cargarArchivoConVector(podiosV,longPodio,podios);
+	fclose(podios);
+
+
+	cout << "=====================LEYENDO ARCHIVO CONSOLA" << endl << endl;
+	leerArchivoConsola(rutaPodios);
 	return 0;
 }
 
@@ -381,73 +418,94 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 	}
 }
 
-/*int buscarCategoria (char valorBuscado[], int posValorBuscado, RegCorredores vectorCarrera[],int longitudVector)
+void crearVectorCategorias (RegCorredores vectorARecorrer[], int longitud, char categoriasEncontradas[][50], int &cantCategorias)
 {
-	for (int i=0;i<longitudVector;i++)
-	{
-		if (strcmp(vectorCarrera[i],valorBuscado[posValorBuscado]) == 0)
-			return posValorBuscado;
-	}
-	return -1;
-}
-*/
-void EncontrarCategorias (RegCorredores vectorCorredores[],int longitudVector) // usar categoria1V[] y categoria2V[]
-{
-	//COMENTARIO: Funcional, pero puedo mejorarla. Ahora voy a seguir trabajando sobre esto,
-	//Mejoras a implementar:
-	//-- Mostrar categorias de forma ordenada
-	//-- Mostrar PODIO similar a como se ve en la funcion imprimirReporte();
+	cantCategorias = 0; // Inicializo en 0, aún no se separaron categorias
 
-	char categoriaLeida[longitudVector][50]; // Vector que almacena las categorias de forma unica
-	int cantCategorias = 0; // Inicializo en 0, aún no se separaron categorias
-
-	for (int i=0;i<longitudVector;i++)
+	for (int i=0;i<longitud;i++)
 	{
 		bool yaLeido = false; // Se reinicia el valor a false porque aún no hizo comprobaciones
 
-		// Chequea el vector categeoriaLeida en busca de coincidencias
+		// Chequea el vector categoriasEncontradas en busca de coincidencias
 		for (int j=0;j<cantCategorias;j++)
 		{
 			//Si encuentra una coincidencia, deja de buscar y pasa al siguiente valor.
-			if (strcmp(vectorCorredores[i].categoria,categoriaLeida[j])  == 0)
+			if (strcmp(vectorARecorrer[i].categoria,categoriasEncontradas[j])  == 0)
 			{
 				yaLeido = true;
 				break;
 			}
 		}
-
-		// Si llega al final del vector y no encontró coincidencias
-		//		1. La agrega al vector categoriaLeida;
-		//		2. Busca a imprime la cantidad de coincidencias buscadas (3 en este caso)
-		//		3. Incrementa en +1 la longitud del vector categoriaLeida.
 		if (!yaLeido)
 		{
-			strcpy(categoriaLeida[cantCategorias], vectorCorredores[i].categoria);
-			ImprimirPodio (3,vectorCorredores,i,longitudVector,categoriaLeida,cantCategorias);
-
+			strcpy(categoriasEncontradas[cantCategorias], vectorARecorrer[i].categoria);
 			cantCategorias++;
 		}
 	}
 }
 
-void ImprimirPodio (int cantImpresiones, RegCorredores vectorARecorrer[], int recorrerDesde, int recorrerHasta, char categoriaBuscada[][50], int posicionBuscada)
+void ordenarCategorias (char vectorAOrdenar [][50],int longitud)
 {
-	int puesto = 0;
-	cout << "\n\n\n================= PODIO " << categoriaBuscada[posicionBuscada] << " =================\n";
-	for (int i = recorrerDesde; i<recorrerHasta;i++)
+	char aux[50];
+	for (int i=0;i<longitud-1;i++)
 	{
-		if (strcmp(vectorARecorrer[i].categoria, categoriaBuscada[posicionBuscada]) == 0 )
+		for (int j=0;j<longitud-1-i;j++)
 		{
-			puesto++;
-			cout << "Puesto: " << puesto << endl
-			<< "Nombre: " <<  vectorARecorrer[i].nombreApellido << endl
-			<< "Genero: " <<  vectorARecorrer[i].genero << endl
-			<< "Ciudad: " <<  vectorARecorrer[i].localidad << endl
-			<< "Tiempo: " <<  vectorARecorrer[i].llegada << endl << endl;
+			if (strcmp(vectorAOrdenar[j],vectorAOrdenar[j+1]) == 1)
+			{
 
+				strcpy(aux,vectorAOrdenar [j]);
+				strcpy(vectorAOrdenar [j],vectorAOrdenar [j+1]);
+				strcpy(vectorAOrdenar [j+1],aux);
+			}
 		}
-		if (puesto == cantImpresiones)
-			break;
 	}
+}
+
+void crearVectorPodio (char vectorCategorias[][50],int cantCategorias, RegCorredores vectorARecorrer[], int longitud, RegCorredores vectorSalida[])
+{
+	int corredoresCopiados = 0;
+	for (int i=0;i<cantCategorias;i++)
+	{
+		int podio = 0;
+
+		for (int j=0; j<longitud;j++)
+		{
+			// Recorre el vector de corredores hasta encontrar el primer resultado que coincida con la categoria
+			if (strcmp (vectorCategorias[i],vectorARecorrer[j].categoria) == 0)
+			{
+				// Chequea si el corredor que encontró terminó la carrera y lo agrega
+				if (strncmp(vectorARecorrer[j].llegada,"No termino",8)!=0 )
+				{
+					vectorSalida[corredoresCopiados] = vectorARecorrer[j];
+					podio++;
+					corredoresCopiados++;
+				}
+			}
+			// Si ya copió 3, sale del for j.
+			if (podio == 3)
+				break;
+		}
+		// Si llega al final de la lista y hay menos de 3 corredores,
+		// los completa con VACANTE.
+		while (podio < 3)
+		{
+			lugarVacante(vectorSalida,corredoresCopiados);
+			corredoresCopiados++;
+			podio++;
+		}
+	}
+}
+
+void lugarVacante(RegCorredores vectorSalida[],int posicion)
+{
+		int i = posicion;
+
+		vectorSalida[i].numero = 0;
+		strcpy(vectorSalida[i].nombreApellido, "VACANTE / NO COMPLETA LA CARRERA");
+		strcpy(vectorSalida[i].categoria,vectorSalida[i-1].categoria);
+		vectorSalida[i].genero = ' ';
+		strcpy(vectorSalida[i].localidad, "\0");
+		strcpy(vectorSalida[i].llegada, "\0");
 
 }
