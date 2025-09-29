@@ -35,19 +35,20 @@ struct CorredoresCiudad {
 
 struct Ciudad{
 	char nombre[11];
-	int cantCorredores;
+	int cantCorredores = 0;
+	int cantClasificados = 0;
 	float tiempoTotal = 0; // es la suma de todos los tiempos de los corredores de una ciudad, el promedio lo hago en la funcion de mostrar por pantalla
 };
 
 struct Localidad{
 	char nombre[40];
-	int cantCiudades; // Cuantas ciudades existen de verdad en el vector ciudades
+	int cantCiudades = 0; // Cuantas ciudades existen de verdad en el vector ciudades
 	Ciudad ciudades[400]; // Tiene tamaño arbitrario
 };
 
 //prototipos
 void cargarCorredoresVector(FILE *, RegCorredores [], int&);
-float horarioASegundos(char []);
+float horarioASegundos(const char []);
 void segundosAHorario(float, char *);
 void ordenarPorTiempo (RegCorredores [], int);
 void separarEnVectoresPorCarrera(RegCorredores [], int, RegCorredores [], int&, RegCorredores [], int&);
@@ -84,6 +85,8 @@ int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre);
 int posCiudad (Localidad localidad, char *nombre);
 
 void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]);
+
+int cantTotalCorredores (Localidad);
 
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
@@ -213,9 +216,9 @@ void cargarCiudadVector(FILE *entrada, CorredoresCiudad ciudadV[], int &longitud
     CorredoresCiudad temp;
 
     while (fread(&temp, sizeof(CorredoresCiudad), 1, entrada) == 1) {
-    	if (strncmp(temp.localidad, "Buenos Aires", 12) == 0 ||
-			strncmp(temp.localidad, "Alemania", 8) == 0 ||
-			strncmp(temp.localidad, "Brasil", 6) == 0 )
+    	if (strcmp(temp.localidad, "Buenos Aires") == 0 ||
+			strcmp(temp.localidad, "Alemania") == 0 ||
+			strcmp(temp.localidad, "Brasil") == 0 )
         	{
         		ciudadV[longitud] = temp;
       	 		longitud++;
@@ -292,7 +295,6 @@ void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiu
 	{
 		posicionLocalidad = cantLocalidades++;
 		strncpy(salida[posicionLocalidad].nombre, entrada.localidad, 40);
-		salida[posicionLocalidad].cantCiudades = 0;
 	}
 	
 	int posicionCiudad = posCiudad(salida[posicionLocalidad], entrada.ciudad);
@@ -300,55 +302,72 @@ void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiu
 	{
 		posicionCiudad = salida[posicionLocalidad].cantCiudades++;
 		strncpy(salida[posicionLocalidad].ciudades[posicionCiudad].nombre, entrada.ciudad, 11);
-		salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores = 0;
 	}
 	
 	salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores++;
 	
-	//Voy sumando los tiempos para obtener el tiempoTotal (El promedio lo calculo al informar)
-	float aux = horarioASegundos((char*)llegada);
-	salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal += aux;
+	//Voy sumando los tiempos de los que terminaron para obtener el tiempoTotal (El promedio lo calculo al informar)
+	if (strncmp(llegada, "No termino", 11) != 0)
+	{
+    	float aux = horarioASegundos((char*)llegada);
+    	salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal += aux;
+    	salida[posicionLocalidad].ciudades[posicionCiudad].cantClasificados++;
+	}
 }
 
 //Falta poner el total de corredores/promedio de cada ciudad al final
 void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades){
 	
-
-	
 	printf("-------------------------------------------------------------------------\n");
-	printf("Localidad    | Ciudad        | Cant. de Corredores   | Tiempo promedio\n ");
+	printf("Localidad    | Ciudad        | Cant. de Corredores   | Tiempo promedio   \n ");
     printf("-------------------------------------------------------------------------\n");
 
-	for (int i = 0; i < cantLocalidades; i++) 
-	{
-        
-		for (int j = 0; j < localidad[i].cantCiudades; j++) 
-		{
-            
-            float promedioSegundos = localidad[i].ciudades[j].tiempoTotal / localidad[i].ciudades[j].cantCorredores;
-            char promedio[12];
-            segundosAHorario(promedioSegundos, promedio);
+	for (int i = 0; i < cantLocalidades; i++) {
+
+		for (int j = 0; j < localidad[i].cantCiudades; j++) {
+		
+		    if (localidad[i].ciudades[j].cantClasificados > 0)  // Solo mostra las ciudades que si haya terminado al menos un corredor
 			
-			if (j == 0)
-			{
-            	printf("%-15s %-15s %-23d %s\n",
-                localidad[i].nombre,
-                localidad[i].ciudades[j].nombre,
-                localidad[i].ciudades[j].cantCorredores,
-				promedio);	
-			}
-			else 
-			{
-				printf("%-15s %-15s %-23d %s \n",
-				"",
-				localidad[i].ciudades[j].nombre,
-                localidad[i].ciudades[j].cantCorredores,
-				promedio);	
-			}
-        }
-        		printf("%s %s\n \n", "Total ",
-                localidad[i].nombre);
-    }
+			{ 
+				float promedioSegundos = localidad[i].ciudades[j].tiempoTotal / localidad[i].ciudades[j].cantClasificados;
+		        char promedio[11];
+		        segundosAHorario(promedioSegundos, promedio);
+		
+		        if (j == 0)
+		            printf("%-15s %-15s %-23d %s\n",
+		                   localidad[i].nombre,
+		                   localidad[i].ciudades[j].nombre,
+		                   localidad[i].ciudades[j].cantCorredores,
+		                   promedio);
+		        else
+		            printf("%-15s %-15s %-23d %s\n",
+		                   "",
+		                   localidad[i].ciudades[j].nombre,
+		                   localidad[i].ciudades[j].cantCorredores,
+		                   promedio);
+		    }
+		}
+		
+		
+		//falta imprimir el tiempo total 
+		printf("%s %-25s %d \n \n", "Total",
+		 		localidad[i].nombre,
+		  		cantTotalCorredores(localidad[i])
+		  		
+		 	  );
+	}
+}
+
+int cantTotalCorredores (Localidad entrada){
+	
+	int cantTotal = 0;
+	
+	for (int i = 0; i < entrada.cantCiudades; i++)
+	{
+		cantTotal += entrada.ciudades[i].cantCorredores;
+	}
+	
+	return cantTotal;
 }
 
 void noTermino(RegCorredores vectorEntrada[], int longitud){
@@ -369,7 +388,7 @@ void cargarCorredoresVector(FILE *archivo, RegCorredores regCorredoresV[], int &
     }
 }
 
-float horarioASegundos(char horario[]){
+float horarioASegundos(const char horario[]){
 	float totalSegundos = 0.0;
 
 	totalSegundos = ((horario[0]-'0')*10 + (horario[1]-'0')) * 3600
