@@ -40,37 +40,24 @@ void segundosAHorario(float, char *);
 void ordenarPorTiempo (RegCorredores [], int);
 void separarEnVectoresPorCarrera(RegCorredores [], int, RegCorredores [], int&, RegCorredores [], int&);
 void cargarArchivoConVector(RegCorredores [], int, FILE *);
-void separarPorCarrera(RegCorredores [], int, FILE *, FILE *);
 int compararTiempos(float , float );
 void inicializarReporte(RegCorredores [], int, ReporteCorredores []);
-
 void calcularPosiciones(ReporteCorredores [] , int);
 void imprimirReporte(ReporteCorredores [], int);
 void noTermino(RegCorredores [], int);
-
 void crearVectorCategorias (RegCorredores [], int, char [][50], int&);
 void ordenarCategorias(char [][50], int);
 void crearVectorPodio(char [][50], int, RegCorredores [], int, RegCorredores [], int&);
-
-
-void lugarVacante(RegCorredores[], int);
 //genera 2 archivos binario del reporte de los corredores por Clasica y NonStop
 void generarReportePorCarreras(const char *, const char *, ReporteCorredores [], int, ReporteCorredores [], int);
-
-//funcion para leer
-void leerArchivoConsola(const char *);
-
-//pasar a vector para trabajar en él y leer (prueba)
-void leerVectorCorredores(RegCorredores [], int);
 void calcularTiempos(ReporteCorredores[], int);
-
 void leerVectorPodios(RegCorredores [], int);
 
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
 	const char rutaCiudades [] = "Ciudades.bin";
-	const char rutaCategoria1 [] = "categoria1.bin";
-	const char rutaCategoria2 [] = "categoria2.bin";
+	const char rutaCarrera1 [] = "Carrera1.bin";
+	const char rutaCarrera2 [] = "Carrera2.bin";
 	const char rutaReporteCarrera1 [] = "reporteCarreraClasica.bin";
 	const char rutaReporteCarrera2 [] = "reporteCarreraNonStop.bin";
 	const char rutaPodios [] = "podios.bin";
@@ -81,19 +68,19 @@ int main() {
 	int longitud2 = 0; //longitud para vector NonStop
 
 	RegCorredores regCorredoresV[longitud];
-	RegCorredores categoria1V[longitud];
-	RegCorredores categoria2V[longitud];
+	RegCorredores carrera1V[longitud];
+	RegCorredores carrera2V[longitud];
 	RegCorredores podiosV[longitud];
 
 	ReporteCorredores reporte1V[longitud];
 	ReporteCorredores reporte2V[longitud];
 
 	FILE* entrada = fopen(rutaEntrada, "rb");
-    FILE* categoria1 = fopen(rutaCategoria1, "wb");
-    FILE* categoria2 = fopen(rutaCategoria2, "wb");
+    FILE* carrera1 = fopen(rutaCarrera1, "wb");
+    FILE* carrera2 = fopen(rutaCarrera2, "wb");
 
 
-    if (!entrada || !categoria1 || !categoria2) {
+    if (!entrada || !carrera1 || !carrera2) {
         cout << "Error al abrir uno de los archivos.\n";
         return 1;
     }
@@ -101,38 +88,10 @@ int main() {
 	cargarCorredoresVector(entrada, regCorredoresV, longitud);
 	noTermino(regCorredoresV, longitud);
 	ordenarPorTiempo(regCorredoresV,longitud);
+	separarEnVectoresPorCarrera(regCorredoresV, longitud, carrera1V, longitud1, carrera2V,longitud2);
 
-	separarEnVectoresPorCarrera(regCorredoresV, longitud, categoria1V, longitud1, categoria2V,longitud2);
-	cout << "Vector Categoria Clasica" << endl;
-	leerVectorCorredores(categoria1V,longitud1); //categoria: 4 Refugios Clasica
-	cout << "----------------------------------------------------------------------------------------------" << endl;
-	cout << "Archivo Categoria NonStop" << endl;
-	leerVectorCorredores(categoria2V,longitud2); //categoria: 4 Refugios NonStop
-
-
-	//Cargo los archivos mediante los vectores de las 2 categorias
-	cargarArchivoConVector(categoria1V, longitud1, categoria1);
-	cargarArchivoConVector(categoria2V, longitud2, categoria2);
-
-	//cierre de archivos, cerrando los archivos porque ya se pasaron a un vector
-    fclose(entrada);
-    fclose(categoria1);
-    fclose(categoria2);
-
-	//cambiandolo a modo lectura para que se pueda leer
-	categoria1 = fopen(rutaCategoria1, "rb");
-	categoria2 = fopen(rutaCategoria2, "rb");
-
-	//ver si se creo y separo correctamente el archivo
-	cout << "Archivo Categoria Clasica" << endl;
-	leerArchivoConsola(rutaCategoria1);
-	cout << "----------------------------------------------------------------------------------------------" << endl;
-	cout << "Archivo Categoria NonStop" << endl;
-	leerArchivoConsola(rutaCategoria2);
-
-	//TRANSFORMACION DE VECTOR CON FORMATO RegCorredores a ReporteCorredores (no hace nada aún, Base ESTRUCTURA PARA EL REPORTE)
-	inicializarReporte(categoria1V,longitud1,reporte1V);
-	inicializarReporte(categoria2V,longitud2,reporte2V);
+	inicializarReporte(carrera1V,longitud1,reporte1V); //trabajamos sigue con el vector 
+	inicializarReporte(carrera2V,longitud2,reporte2V); //trabajamos sigue con el vector
 
 	calcularPosiciones(reporte1V , longitud1);
 	calcularPosiciones(reporte2V , longitud2);
@@ -141,38 +100,43 @@ int main() {
 	calcularTiempos(reporte1V, longitud1);
 	calcularTiempos(reporte2V, longitud2);
 
-	//imprime por consola
+	//imprime por consola CONSIGNA 1 MUESTRA
 	imprimirReporte(reporte1V, longitud1);
 	imprimirReporte(reporte2V, longitud2);
 
-	//genera archivo reporte
+	//genera archivo reporte (una vez ya habiendo validado por imprimirReporte()1 y 2 
 	generarReportePorCarreras(rutaReporteCarrera1, rutaReporteCarrera2, reporte1V, longitud1, reporte2V, longitud2);
 
-	fclose(categoria1);
-    fclose(categoria2);
+	fclose(carrera1);
+    fclose(carrera2);
 
 	char vectorCategorias[longitud][50];
 	int aux = 0;
+	int longPodio = aux*3;
+	
 	crearVectorCategorias(regCorredoresV,longitud,vectorCategorias,aux); //separa las categorias en una matriz
 	ordenarCategorias(vectorCategorias,aux);
 	
+	/* ver si se cargaron las categorias y si esta ordenado (borrar)
 	cout << "VECTOR CATEGORIAS ORDENADO: \n";
 	cout << "AUX: " << aux << endl;
-	for (int i=0;i<aux;i++)
-	{
+	for (int i=0;i<aux;i++){
 		cout << vectorCategorias[i] << endl;
 	}
+	*/
 
-	int longPodio = aux*3;
 	crearVectorPodio (vectorCategorias,aux,regCorredoresV,longitud,podiosV, longPodio);
 	leerVectorPodios(podiosV,longPodio);
 
 	FILE* podios = fopen(rutaPodios, "wb");
+	
 	if (!podios) {
 		cout << "Error al crear archivo 'podios.bin'";
 		return 1;
 	}
-	cargarArchivoConVector(podiosV,longPodio,podios);
+	
+	cargarArchivoConVector(podiosV,longPodio,podios); //podiamos pasar la ruta y que ahi dentro valide si se abrio y abrir el archivo (quiza mejorar o no)
+
 	fclose(podios);
 
 	return 0;
@@ -264,23 +228,21 @@ void separarEnVectoresPorCarrera(RegCorredores vectorCorredores[], int longitud,
 }
 
 void leerVectorCorredores(RegCorredores regCorredores[], int longitud){
-	//BORRAR
-	cout << "EJECUTANDO: leerVectorCorredores" << endl;
-	////////
-	for (int i = 0; i < longitud; i++) {
-        cout << "-----------------------------" << endl;
-        cout << "Corredor #" << i + 1 << endl; //contador
-        cout << "Numero: " << regCorredores[i].numero << endl;
-        cout << "Nombre y Apellido: " << regCorredores[i].nombreApellido << endl;
-        cout << "Categoria: " << regCorredores[i].categoria << endl;
-        cout << "Genero: " << regCorredores[i].genero << endl;
-        cout << "Localidad: " << regCorredores[i].localidad << endl;
-        cout << "Horario de llegada: " << regCorredores[i].llegada << endl;
+	printf("-----------------------------------------------------------------------------------------------------------------------------\n");
+    printf("Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    \n");
+    printf("-----------------------------------------------------------------------------------------------------------------------------\n");
+
+    for (int i = 0; i < longitud; i++) {
+        printf("%6d | %-37s | %-48s |   %c    | %-18s | %-10s\n",
+               regCorredores[i].numero,
+               regCorredores[i].nombreApellido,
+               regCorredores[i].categoria,
+               regCorredores[i].genero,
+               regCorredores[i].localidad,
+               regCorredores[i].llegada);
     }
-    cout << "-----------------------------" << endl;
-	//BORRAR
-	cout << "FINALIZANDO: leerVectorCorredores" << endl;
-	////////
+
+    printf("-----------------------------------------------------------------------------------------------------------------------------\n");
 }
 
 void leerVectorPodios(RegCorredores regCorredores[], int longitud) {
@@ -304,11 +266,9 @@ void leerVectorPodios(RegCorredores regCorredores[], int longitud) {
             cout << "Horario de llegada: " << regCorredores[i + j].llegada << endl;
             posicion++;
         }
-
         // Saltar a la siguiente categoría
         i += posicion - 1;
     }
-
     cout << "\n========== FIN DE PODIOS ==========" << endl;
 }
 
@@ -318,6 +278,7 @@ void cargarArchivoConVector(RegCorredores vectorEntrada[], int longitud, FILE *a
 
 int compararTiempos (float tiempoReferencia, float tiempoActual){
 	int diferencia = 0;
+	
 	diferencia = tiempoReferencia - tiempoActual;
 	return diferencia;
 }
@@ -402,21 +363,6 @@ void generarReportePorCarreras(const char* ruta1, const char* ruta2, ReporteCorr
 	fclose(r2);
 }
 
-void leerArchivoConsola(const char* ruta){
-    FILE* f = fopen(ruta, "rb");
-    if(!f){
-        cout << "No se pudo abrir el archivo: " << ruta << endl;
-        return;
-    }
-    RegCorredores reg;
-    while(fread(&reg, sizeof(RegCorredores), 1, f) == 1){
-        cout << "Numero: " << reg.numero << " | ";
-        printf("%-48s  | ", reg.categoria);
-        cout << "Genero: " << reg.genero << endl;
-    }
-    fclose(f);
-}
-
 void calcularTiempos(ReporteCorredores reporte[], int longitud){
 	float aux;
 	
@@ -491,9 +437,5 @@ void crearVectorPodio(char vectorCategorias[][50],int cantCategorias, RegCorredo
 			// Si ya copió 3, sale del for j.
 			if(podio == 3) break;
 		}
-	
 	}
-	
 }
-
-//generar los archivos con solo los datos en binario
