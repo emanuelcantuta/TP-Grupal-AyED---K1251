@@ -83,7 +83,7 @@ int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre);
 
 int posCiudad (Localidad localidad, char *nombre);
 
-int registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]);
+void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]);
 
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
@@ -284,7 +284,7 @@ int posCiudad (Localidad localidad, char *nombre){
 }
 	
 //Funcion que carga el vector de localidades, viendo si la localidad/ciudad ya esta o no
-int registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]){
+void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]){
 	
 	//Veo primero si la localidad(Alguna de las 3) ya existe o no en el vector de salida	
 	int posicionLocalidad = posLocalidad (salida, cantLocalidades, entrada.localidad);
