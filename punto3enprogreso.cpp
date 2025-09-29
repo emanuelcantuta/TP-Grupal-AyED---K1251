@@ -36,7 +36,7 @@ struct CorredoresCiudad {
 struct Ciudad{
 	char nombre[11];
 	int cantCorredores;
-	char tiempoTotal[11];
+	float tiempoTotal = 0; // es la suma de todos los tiempos de los corredores de una ciudad, el promedio lo hago en la funcion de mostrar por pantalla
 };
 
 struct Localidad{
@@ -75,51 +75,15 @@ void cargarCiudadVector(FILE *, CorredoresCiudad[], int&);
 
 void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades);
 
-int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre){
-	for (int i = 0; i < cantLocalidades; i++)
-	{
-		if (strncmp(localidades[i].nombre, nombre, 40) == 0)
-		{
-			return i; // Devuelve la posicion donde esta la localidad a buscar (Osea que ya existe)
-		}
-	}
-	return -1; //Devuelve -1 si no esta
-}
+void ordenarAlfabeticamenteLocalidad(Localidad entrada[], int cantLocalidades);
 
-int posCiudad (Localidad localidad, char *nombre){
-	for (int i = 0; i < localidad.cantCiudades; i++)
-	{
-		if (strncmp(localidad.ciudades[i].nombre, nombre, 11) == 0)
-		{
-			return i; // Devuelve la posicion donde esta la ciudad a buscar (Osea que ya existe)
-		}
-	}
-	return -1; //Devuelve -1 si no esta
-}
-	
-//Funcion que carga el vector de localidades, viendo si la localidad/ciudad ya esta o no
-int registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada){
-	
-	//Veo primero si la localidad(Alguna de las 3) ya existe o no en el vector de salida	
-	int posicionLocalidad = posLocalidad (salida, cantLocalidades, entrada.localidad);
-	if (posicionLocalidad == -1) // agrega si es una nueva localidad
-	{
-		posicionLocalidad = cantLocalidades++;
-		strncpy(salida[posicionLocalidad].nombre, entrada.localidad, 40);
-		salida[posicionLocalidad].cantCiudades = 0;
-	}
-	
-	int posicionCiudad = posCiudad(salida[posicionLocalidad], entrada.ciudad);
-	if(posicionCiudad == -1)
-	{
-		posicionCiudad = salida[posicionLocalidad].cantCiudades++;
-		strncpy(salida[posicionLocalidad].ciudades[posicionCiudad].nombre, entrada.ciudad, 11);
-		salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores = 0;
-		strncpy(salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal, "00:00:00", 11);
-	}
-	
-	salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores++;
-}
+void ordenarAlfabeticamenteCiudad(Ciudad entrada[], int cantCiudades);
+
+int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre);
+
+int posCiudad (Localidad localidad, char *nombre);
+
+int registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]);
 
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
@@ -204,7 +168,7 @@ int main() {
     
     //Punto 3 - “Ciudades.bin”
     
-    int longitud3 = 0; //longitud para vector Ciudad (Solo va a contener las que pide el punto 3 (BsAs, Alemania y Brasil))
+    int longitud3 = 10; //longitud arbitraria para vector Ciudad (Solo va a contener las que pide el punto 3 (BsAs, Alemania y Brasil))
     CorredoresCiudad ciudadV[longitud3];
     
     Localidad localidades[10]; // Vector que va a contener a las ciudades (tamaño de 10 arbitrario, ya que hay solo 3 localidades)
@@ -219,10 +183,20 @@ int main() {
     //Cargo el vector Ciudad solo con las 3 localidades que pide el tp
     cargarCiudadVector(entrada, ciudadV, longitud3);
     
-    // Recorro el vector de ciudades para ir registrando cada localidad en el vector localidades 
+    //Recorro el vector de ciudades para ir registrando cada localidad en el vector localidades 
     for (int i = 0; i < longitud3; i++) {
-        registrarLocalidad(localidades, cantLocalidades, ciudadV[i]);
+    	//Recorro el vector RegCorredores para encontrar el tiempo de cada corredor
+    	for (int j = 0; j < longitud; j++){
+    		if (ciudadV[i].numero == regCorredoresV[j].numero)
+    		{
+    			        registrarLocalidad(localidades, cantLocalidades, ciudadV[i], regCorredoresV[j].llegada);
+    			        break;
+			}
+		}
     }
+	
+	//Ordeno alfabeticamente el vector de localidades/ciudades
+	ordenarAlfabeticamenteLocalidad(localidades, cantLocalidades);
 	
 	imprimirReporteLocalidades(localidades, cantLocalidades);
     
@@ -249,33 +223,131 @@ void cargarCiudadVector(FILE *entrada, CorredoresCiudad ciudadV[], int &longitud
     }
 }
 
-//Falta poner el total de corredores/promedio de cada ciudad al final y tambien hay que ordenar alfabeticamente los vectores
+void ordenarAlfabeticamenteLocalidad(Localidad entrada[], int cantLocalidades){
+	
+	Localidad aux;
+
+	for (int i = 0; i < cantLocalidades - 1; i++){
+
+		for (int j = 0; j < cantLocalidades - i - 1;j++){
+
+			if (strcmp(entrada[j].nombre, entrada[j+1].nombre) > 0){
+				aux = entrada[j];
+				entrada[j] = entrada [j+1];
+				entrada [j+1] = aux;
+			}
+		}
+	}
+	
+		for (int i = 0; i < cantLocalidades; i++){
+		ordenarAlfabeticamenteCiudad(entrada[i].ciudades, entrada [i].cantCiudades);
+	}
+}
+
+void ordenarAlfabeticamenteCiudad(Ciudad entrada[], int cantCiudades){
+	
+	Ciudad aux;
+
+	for (int i = 0; i < cantCiudades - 1; i++){
+
+		for (int j = 0; j < cantCiudades - i - 1;j++){
+
+			if (strcmp(entrada[j].nombre, entrada[j+1].nombre) > 0){
+				aux = entrada[j];
+				entrada[j] = entrada [j+1];
+				entrada [j+1] = aux;
+			}
+		}
+	}
+}
+
+int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre){
+	for (int i = 0; i < cantLocalidades; i++)
+	{
+		if (strncmp(localidades[i].nombre, nombre, 40) == 0)
+		{
+			return i; // Devuelve la posicion donde esta la localidad a buscar (Osea que ya existe)
+		}
+	}
+	return -1; //Devuelve -1 si no esta
+}
+
+int posCiudad (Localidad localidad, char *nombre){
+	for (int i = 0; i < localidad.cantCiudades; i++)
+	{
+		if (strncmp(localidad.ciudades[i].nombre, nombre, 11) == 0)
+		{
+			return i; // Devuelve la posicion donde esta la ciudad a buscar (Osea que ya existe)
+		}
+	}
+	return -1; //Devuelve -1 si no esta
+}
+	
+//Funcion que carga el vector de localidades, viendo si la localidad/ciudad ya esta o no
+int registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]){
+	
+	//Veo primero si la localidad(Alguna de las 3) ya existe o no en el vector de salida	
+	int posicionLocalidad = posLocalidad (salida, cantLocalidades, entrada.localidad);
+	if (posicionLocalidad == -1) // agrega si es una nueva localidad
+	{
+		posicionLocalidad = cantLocalidades++;
+		strncpy(salida[posicionLocalidad].nombre, entrada.localidad, 40);
+		salida[posicionLocalidad].cantCiudades = 0;
+	}
+	
+	int posicionCiudad = posCiudad(salida[posicionLocalidad], entrada.ciudad);
+	if(posicionCiudad == -1)
+	{
+		posicionCiudad = salida[posicionLocalidad].cantCiudades++;
+		strncpy(salida[posicionLocalidad].ciudades[posicionCiudad].nombre, entrada.ciudad, 11);
+		salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores = 0;
+	}
+	
+	salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores++;
+	
+	//Voy sumando los tiempos para obtener el tiempoTotal (El promedio lo calculo al informar)
+	float aux = horarioASegundos((char*)llegada);
+	salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal += aux;
+}
+
+//Falta poner el total de corredores/promedio de cada ciudad al final
 void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades){
 	
-	printf("--------------------------------------------------------\n");
-	printf("Localidad    | Ciudad        | Cantidad de Corredores   \n ");
-    printf("--------------------------------------------------------\n");
+
+	
+	printf("-------------------------------------------------------------------------\n");
+	printf("Localidad    | Ciudad        | Cant. de Corredores   | Tiempo promedio\n ");
+    printf("-------------------------------------------------------------------------\n");
 
 	for (int i = 0; i < cantLocalidades; i++) 
 	{
         
 		for (int j = 0; j < localidad[i].cantCiudades; j++) 
 		{
-            if (j == 0)
+            
+            float promedioSegundos = localidad[i].ciudades[j].tiempoTotal / localidad[i].ciudades[j].cantCorredores;
+            char promedio[12];
+            segundosAHorario(promedioSegundos, promedio);
+			
+			if (j == 0)
 			{
-            	printf("%-15s %-15s %-20d\n",
+            	printf("%-15s %-15s %-23d %s\n",
                 localidad[i].nombre,
                 localidad[i].ciudades[j].nombre,
-                localidad[i].ciudades[j].cantCorredores);	
+                localidad[i].ciudades[j].cantCorredores,
+				promedio);	
 			}
 			else 
 			{
-				printf("%-15s %-15s %-20d\n",
+				printf("%-15s %-15s %-23d %s \n",
 				"",
 				localidad[i].ciudades[j].nombre,
-                localidad[i].ciudades[j].cantCorredores);	
+                localidad[i].ciudades[j].cantCorredores,
+				promedio);	
 			}
         }
+        		printf("%s %s\n \n", "Total ",
+                localidad[i].nombre);
     }
 }
 
