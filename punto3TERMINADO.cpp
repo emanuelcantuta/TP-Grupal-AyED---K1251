@@ -37,7 +37,7 @@ struct Ciudad{
 	char nombre[11];
 	int cantCorredores = 0;
 	int cantClasificados = 0;
-	float tiempoTotal = 0; // es la suma de todos los tiempos de los corredores de una ciudad, el promedio lo hago en la funcion de mostrar por pantalla
+	float tiempoTotal = 0.0; // es la suma de todos los tiempos de los corredores de una ciudad, el promedio lo hago en la funcion de mostrar por pantalla
 };
 
 struct Localidad{
@@ -299,7 +299,7 @@ int posCiudad (Localidad localidad, char *nombre){
 //Funcion que carga el vector de localidades, viendo si la localidad/ciudad ya esta o no
 void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, const char llegada[]){
 	
-	//Veo primero si la localidad(Alguna de las 3) ya existe o no en el vector de salida	
+	//Veo primero si la localidad ya existe o no en el vector de salida	
 	int posicionLocalidad = posLocalidad (salida, cantLocalidades, entrada.localidad);
 	if (posicionLocalidad == -1) // agrega si es una nueva localidad
 	{
@@ -319,7 +319,7 @@ void registrarLocalidad (Localidad salida[], int &cantLocalidades, CorredoresCiu
 	//Voy sumando los tiempos de los que terminaron para obtener el tiempoTotal (El promedio lo calculo al informar)
 	if (strncmp(llegada, "No termino", 11) != 0)
 	{
-    	float aux = horarioASegundos((char*)llegada);
+    	float aux = horarioASegundos(llegada);
     	salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal += aux;
     	salida[posicionLocalidad].ciudades[posicionCiudad].cantClasificados++;
 	}
@@ -331,7 +331,10 @@ void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades){
 	printf("-------------------------------------------------------------------------\n");
 	printf("Localidad    | Ciudad        | Cant. de Corredores   | Tiempo promedio   \n ");
     printf("-------------------------------------------------------------------------\n");
-
+	
+	float tiempoTotalSegundos = 0.0;
+	int clasificadosTotal = 0;
+	
 	for (int i = 0; i < cantLocalidades; i++) {
 
 		for (int j = 0; j < localidad[i].cantCiudades; j++) {
@@ -356,16 +359,39 @@ void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades){
 		                   localidad[i].ciudades[j].cantCorredores,
 		                   promedio);
 		    }
+		    
+			tiempoTotalSegundos += localidad[i].ciudades[j].tiempoTotal; // Suma los tiempos de las ciudades de una misma localidad	
+			clasificadosTotal += localidad[i].ciudades[j].cantClasificados; // Cant de corredores clasificados de una misma localidad
 		}
+
 		
+		// Evita mostrar basura si no hay corredores clasficidos en una localidad
+		if (clasificadosTotal != 0)
+			{
+				// Tiempo promedio total de la localidad (Sumar los tiempos de sus ciudades)
+				float promedioTotalSegundos = tiempoTotalSegundos / clasificadosTotal;
+				char promedioTotal[11];
+			    segundosAHorario(promedioTotalSegundos, promedioTotal);
+				
+				printf("%s %-25s %-23d %s \n", "Total",
+				 		localidad[i].nombre,
+				  		cantTotalCorredores(localidad[i]),
+				  		promedioTotal
+				 	  );
+				printf("-------------------------------------------------------------------------\n");
+			}
+		else
+			{
+				printf("%s %-25s %-23d %s \n", "Total",
+				 		localidad[i].nombre,
+				  		cantTotalCorredores(localidad[i]),
+				  		"Sin clasificados"
+				 	  );
+				printf("-------------------------------------------------------------------------\n");
+			}
 		
-		//falta imprimir el tiempo total 
-		printf("%s %-25s %d \n", "Total",
-		 		localidad[i].nombre,
-		  		cantTotalCorredores(localidad[i])
-		  		
-		 	  );
-		printf("-------------------------------------------------------------------------\n");
+		tiempoTotalSegundos = 0; // Reincio la suma de tiempo, para hacerlo con otra localidad
+		clasificadosTotal = 0; // Reinicio de clasificados
 	}
 }
 
