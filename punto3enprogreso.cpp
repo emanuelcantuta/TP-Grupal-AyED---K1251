@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+
 using namespace std;
 
 struct RegCorredores {
@@ -170,10 +171,10 @@ int main() {
     
     //Punto 3 - “Ciudades.bin”
     
-    int longitud3 = 10; //longitud arbitraria para vector Ciudad (Solo va a contener las que pide el punto 3 (BsAs, Alemania y Brasil))
+    int longitud3 = 300; //longitud arbitraria para vector Ciudad
     CorredoresCiudad ciudadV[longitud3];
     
-    Localidad localidades[10]; // Vector que va a contener a las ciudades (tamaño de 10 arbitrario, ya que hay solo 3 localidades)
+    Localidad localidades[100]; // Vector que va a contener a las ciudades (tamaño de 100 arbitrario)
     int cantLocalidades = 0; // Variable que contiene el tamaño real del vector localidades, despues cambia mediante las funciones
 	
 	entrada = fopen(rutaCiudades, "rb");
@@ -184,6 +185,21 @@ int main() {
     
     //Cargo el vector Ciudad solo con las 3 localidades que pide el tp
     cargarCiudadVector(entrada, ciudadV, longitud3);
+    
+	/*	cout << "=== Depuracion de tiempos por corredor ===" << endl;
+		for (int i = 0; i < longitud3; i++) { // recorro vector de ciudades filtradas
+		    for (int j = 0; j < longitud; j++) { // recorro vector general de corredores
+		        if (ciudadV[i].numero == regCorredoresV[j].numero) {
+		            cout << "Corredor #" << regCorredoresV[j].numero
+		                 << " | Localidad: " << ciudadV[i].localidad
+		                 << " | Ciudad: " << ciudadV[i].ciudad
+		                 << " | Llegada: " << regCorredoresV[j].llegada
+		                 << " | Segundos: " << regCorredoresV[j].llegada
+		                 << endl;
+		        }
+		    }
+		} */
+    
     
     //Recorro el vector de ciudades para ir registrando cada localidad en el vector localidades 
     for (int i = 0; i < longitud3; i++) {
@@ -209,19 +225,14 @@ int main() {
 
 //funciones para Punto 3
 
-//funcion que carga el vector de ciudades (Solo agrega las localidades de BsAs, Alemania y Brasil como pide el informe)
+//funcion que carga el vector de ciudades
 void cargarCiudadVector(FILE *entrada, CorredoresCiudad ciudadV[], int &longitud){
 	longitud = 0;
     CorredoresCiudad temp;
 
-    while (fread(&temp, sizeof(CorredoresCiudad), 1, entrada) == 1) {
-    	if (strcmp(temp.localidad, "Buenos Aires") == 0 ||
-			strcmp(temp.localidad, "Alemania") == 0 ||
-			strcmp(temp.localidad, "Brasil") == 0 )
-        	{
+    while (fread(&temp, sizeof(CorredoresCiudad), 1, entrada) == 1) {	
         		ciudadV[longitud] = temp;
-      	 		longitud++;
-			}
+      	 		longitud++;	
     }
 }
 
@@ -349,11 +360,12 @@ void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades){
 		
 		
 		//falta imprimir el tiempo total 
-		printf("%s %-25s %d \n \n", "Total",
+		printf("%s %-25s %d \n", "Total",
 		 		localidad[i].nombre,
 		  		cantTotalCorredores(localidad[i])
 		  		
 		 	  );
+		printf("-------------------------------------------------------------------------\n");
 	}
 }
 
