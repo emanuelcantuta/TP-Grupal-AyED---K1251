@@ -12,13 +12,6 @@ struct RegCorredores {
     char llegada[11];
 };
 
-struct CorredoresCiudad {
-	int numero;
-	char nombreApellido[50];
-	char localidad[40];
-	char ciudad[11];
-};
-
 struct ReporteCorredores{
 	int posGral;
 	int posGenero;
@@ -31,6 +24,26 @@ struct ReporteCorredores{
 	char llegada[11];
 	char difPrimero[11];
 	char difAnterior[11];
+};
+
+struct CorredoresCiudad {
+	int numero;
+	char nombreApellido[50];
+	char localidad[40];
+	char ciudad[11];
+};
+
+struct Ciudad{
+	char nombre[11];
+	int cantCorredores = 0;
+	int cantClasificados = 0;
+	float tiempoTotal = 0.0; // es la suma de todos los tiempos de los corredores de una ciudad, el promedio lo hago en la funcion de mostrar por pantalla
+};
+
+struct Localidad{
+	char nombre[40];
+	int cantCiudades = 0;
+	Ciudad ciudades[400]; // Tiene tamaño arbitrario
 };
 
 //prototipos
@@ -52,6 +65,15 @@ void crearVectorPodio(char [][50], int, RegCorredores [], int, RegCorredores [],
 void generarReportePorCarreras(const char *, const char *, ReporteCorredores [], int, ReporteCorredores [], int);
 void calcularTiempos(ReporteCorredores[], int);
 void leerVectorPodios(RegCorredores [], int);
+//punto 3
+void cargarCiudadVector(FILE *, CorredoresCiudad [], int&);
+void imprimirReporteLocalidades(Localidad [], int);
+void ordenarAlfabeticamenteLocalidad(Localidad [], int);
+void ordenarAlfabeticamenteCiudad(Ciudad [], int);
+int posLocalidad(Localidad [], int, char*);
+int posCiudad(Localidad , char*);
+void registrarLocalidad(Localidad [], int&, CorredoresCiudad, char []);
+int cantTotalCorredores(Localidad);
 
 int main() {
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
@@ -61,7 +83,6 @@ int main() {
 	const char rutaReporteCarrera1 [] = "reporteCarreraClasica.bin";
 	const char rutaReporteCarrera2 [] = "reporteCarreraNonStop.bin";
 	const char rutaPodios [] = "podios.bin";
-
 
     int longitud = 1000; //longitud base general
 	int longitud1 = 0; //longitud para vector Clasica
@@ -101,12 +122,16 @@ int main() {
 	calcularTiempos(reporte2V, longitud2);
 
 	//imprime por consola CONSIGNA 1 MUESTRA
+	cout << "Reporte Corresdores Clasica" << endl;
 	imprimirReporte(reporte1V, longitud1);
+	cout << endl;
+	cout << "Reporte Corresdores NonStop" << endl;
 	imprimirReporte(reporte2V, longitud2);
-
+	cout << endl;
+	
+	
 	//genera archivo reporte (una vez ya habiendo validado por imprimirReporte()1 y 2 
 	generarReportePorCarreras(rutaReporteCarrera1, rutaReporteCarrera2, reporte1V, longitud1, reporte2V, longitud2);
-
 	fclose(carrera1);
     fclose(carrera2);
 
@@ -116,15 +141,6 @@ int main() {
 	
 	crearVectorCategorias(regCorredoresV,longitud,vectorCategorias,aux); //separa las categorias en una matriz
 	ordenarCategorias(vectorCategorias,aux);
-	
-	/* ver si se cargaron las categorias y si esta ordenado (borrar)
-	cout << "VECTOR CATEGORIAS ORDENADO: \n";
-	cout << "AUX: " << aux << endl;
-	for (int i=0;i<aux;i++){
-		cout << vectorCategorias[i] << endl;
-	}
-	*/
-
 	crearVectorPodio (vectorCategorias,aux,regCorredoresV,longitud,podiosV, longPodio);
 	leerVectorPodios(podiosV,longPodio);
 
@@ -136,9 +152,34 @@ int main() {
 	}
 	
 	cargarArchivoConVector(podiosV,longPodio,podios); //podiamos pasar la ruta y que ahi dentro valide si se abrio y abrir el archivo (quiza mejorar o no)
-
 	fclose(podios);
-
+//punto 3
+    int longitud3 = 300;
+    CorredoresCiudad ciudadV[longitud3];
+	int cantLocalidades = 0; 
+	Localidad localidades[100];
+	
+	entrada = fopen(rutaCiudades, "rb");
+    if (!entrada) {
+        cout << "Error al abrir uno de los archivos.\n";
+        return 1;
+    }
+    
+    cargarCiudadVector(entrada, ciudadV, longitud3);
+    
+    //Recorro el vector de ciudades para ir registrando cada localidad en el vector localidades 
+    for (int i = 0; i < longitud3; i++) {
+    	//Recorro el vector RegCorredores para encontrar el tiempo de cada corredor
+    	for (int j = 0; j < longitud; j++){
+    		if (ciudadV[i].numero == regCorredoresV[j].numero){
+		        registrarLocalidad(localidades, cantLocalidades, ciudadV[i], regCorredoresV[j].llegada);
+		        break;
+			}
+		}
+    }
+	ordenarAlfabeticamenteLocalidad(localidades, cantLocalidades);
+	imprimirReporteLocalidades(localidades, cantLocalidades);
+    fclose(entrada);    
 	return 0;
 }
 
@@ -270,6 +311,7 @@ void leerVectorPodios(RegCorredores regCorredores[], int longitud) {
         i += posicion - 1;
     }
     cout << "\n========== FIN DE PODIOS ==========" << endl;
+    cout << endl;
 }
 
 void cargarArchivoConVector(RegCorredores vectorEntrada[], int longitud, FILE *archivoSalida){
@@ -438,4 +480,145 @@ void crearVectorPodio(char vectorCategorias[][50],int cantCategorias, RegCorredo
 			if(podio == 3) break;
 		}
 	}
+}
+
+//punto3
+void cargarCiudadVector(FILE *entrada, CorredoresCiudad ciudadV[], int &longitud){
+	longitud = 0;
+    CorredoresCiudad temp;
+
+    while(fread(&temp, sizeof(CorredoresCiudad), 1, entrada) == 1){	
+		ciudadV[longitud] = temp;
+		longitud++;	
+    }
+}
+
+void ordenarAlfabeticamenteLocalidad(Localidad entrada[], int cantLocalidades){
+	Localidad aux;
+
+	for(int i = 0; i < cantLocalidades - 1; i++){
+		for(int j = 0; j < cantLocalidades - i - 1;j++){
+			if(strcmp(entrada[j].nombre, entrada[j+1].nombre) > 0){
+				aux = entrada[j];
+				entrada[j] = entrada[j+1];
+				entrada[j+1] = aux;
+			}
+		}
+	}
+	
+	for(int i = 0; i < cantLocalidades; i++){
+		ordenarAlfabeticamenteCiudad(entrada[i].ciudades, entrada [i].cantCiudades);
+	}
+}
+
+void ordenarAlfabeticamenteCiudad(Ciudad entrada[], int cantCiudades){
+	Ciudad aux;
+
+	for(int i = 0; i < cantCiudades - 1; i++){
+		for(int j = 0; j < cantCiudades - i - 1; j++){
+			if(strcmp(entrada[j].nombre, entrada[j+1].nombre) > 0){
+				aux = entrada[j];
+				entrada[j] = entrada [j+1];
+				entrada [j+1] = aux;
+			}
+		}
+	}
+}
+
+int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre){
+	for(int i = 0; i < cantLocalidades; i++){
+		if(strncmp(localidades[i].nombre, nombre, 40) == 0){
+			return i;
+		}
+	}
+	return -1;
+}
+
+int posCiudad (Localidad localidad, char *nombre){
+	for(int i = 0; i < localidad.cantCiudades; i++){
+		if(strncmp(localidad.ciudades[i].nombre, nombre, 11) == 0){
+			return i;
+		}
+	}
+	return -1;
+}
+	
+//Funcion que carga el vector de localidades, viendo si la localidad/ciudad ya esta o no
+void registrarLocalidad(Localidad salida[], int &cantLocalidades, CorredoresCiudad entrada, char llegada[]){
+	//Veo primero si la localidad ya existe o no en el vector de salida	
+	int posicionLocalidad = posLocalidad (salida, cantLocalidades, entrada.localidad);
+	
+	if(posicionLocalidad == -1){ // agrega si es una nueva localidad
+		posicionLocalidad = cantLocalidades++;
+		strncpy(salida[posicionLocalidad].nombre, entrada.localidad, 40);
+	}
+	
+	int posicionCiudad = posCiudad(salida[posicionLocalidad], entrada.ciudad);
+	
+	if(posicionCiudad == -1){
+		posicionCiudad = salida[posicionLocalidad].cantCiudades++;
+		strncpy(salida[posicionLocalidad].ciudades[posicionCiudad].nombre, entrada.ciudad, 11);
+	}
+	salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores++;
+	//Voy sumando los tiempos de los que terminaron para obtener el tiempoTotal (El promedio lo calculo al informar)
+	if(strncmp(llegada, "No termino", 11) != 0){
+    	float aux = horarioASegundos(llegada);
+    	salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal += aux;
+    	salida[posicionLocalidad].ciudades[posicionCiudad].cantClasificados++;
+	}
+}
+
+void imprimirReporteLocalidades(Localidad localidad[], int cantLocalidades){
+	float tiempoTotalSegundos = 0.0;
+	int clasificadosTotal = 0;
+	
+	cout << "============================= Reporte Ciudades =============================" << endl;
+	
+	cout << "----------------------------------------------------------------------------" << endl;
+	cout << " Localidad       | Ciudad        | Cant. de Corredores   | Tiempo promedio   " << endl;
+	cout << "----------------------------------------------------------------------------" << endl;
+	
+	for(int i = 0; i < cantLocalidades; i++) {
+		for(int j = 0; j < localidad[i].cantCiudades; j++) {
+		    if(localidad[i].ciudades[j].cantClasificados > 0){   // Solo mostra las ciudades que si haya terminado al menos un corredor 
+				float promedioSegundos = localidad[i].ciudades[j].tiempoTotal / localidad[i].ciudades[j].cantClasificados;
+		        char promedio[11];
+		        
+		        segundosAHorario(promedioSegundos, promedio);
+		
+		        if(j == 0){
+		        	printf("%-17s %-17s %-23d %-3s\n", localidad[i].nombre, localidad[i].ciudades[j].nombre, localidad[i].ciudades[j].cantCorredores, promedio);
+		        }else{	
+		            printf("%-17s %-17s %-23d %-3s\n", "", localidad[i].ciudades[j].nombre, localidad[i].ciudades[j].cantCorredores, promedio);
+		        }
+		    }	    
+			tiempoTotalSegundos += localidad[i].ciudades[j].tiempoTotal; // Suma los tiempos de las ciudades de una misma localidad	
+			clasificadosTotal += localidad[i].ciudades[j].cantClasificados; // Cant de corredores clasificados de una misma localidad
+		}
+		
+		// Evita mostrar basura si no hay corredores clasficidos en una localidad
+		if(clasificadosTotal != 0){
+			float promedioTotalSegundos = tiempoTotalSegundos / clasificadosTotal;
+			char promedioTotal[11];
+		    segundosAHorario(promedioTotalSegundos, promedioTotal);
+			
+			printf("%s %-29s %-23d %-3s \n", "Total", localidad[i].nombre, cantTotalCorredores(localidad[i]), promedioTotal);
+			cout << "----------------------------------------------------------------------------" << endl;
+		}else{
+			printf("%s %-29s %-23d %-3s \n", "Total", localidad[i].nombre, cantTotalCorredores(localidad[i]), "Sin clasificados");
+			cout << "----------------------------------------------------------------------------" << endl;
+		}
+		tiempoTotalSegundos = 0; // Reincio la suma de tiempo, para hacerlo con otra localidad
+		clasificadosTotal = 0; // Reinicio de clasificados
+	}
+}
+
+int cantTotalCorredores(Localidad entrada){
+	int cantTotal = 0;
+	
+	for (int i = 0; i < entrada.cantCiudades; i++){
+		cantTotal += entrada.ciudades[i].cantCorredores;
+	}
+	
+	return cantTotal;
 }
