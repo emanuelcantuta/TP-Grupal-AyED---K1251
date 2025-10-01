@@ -48,8 +48,8 @@ struct Localidad{
 
 //prototipos
 void cargarCorredoresVector(FILE *, RegCorredores [], int&);
-float horarioASegundos(char []);
-void segundosAHorario(float, char *);
+int horarioASegundos(char []);
+void segundosAHorario(int, char *);
 void ordenarPorTiempo (RegCorredores [], int);
 void separarEnVectoresPorCarrera(RegCorredores [], int, RegCorredores [], int&, RegCorredores [], int&);
 void cargarArchivoConVector(RegCorredores [], int, FILE *);
@@ -76,6 +76,28 @@ void registrarLocalidad(Localidad [], int&, CorredoresCiudad, char []);
 int cantTotalCorredores(Localidad);
 
 int main() {
+	// BORRAR CUANDO SE HAYA CORREGIDO: TEST ERROR DE CONVERSION DE HORARIO SEGUNDOS Y DE SEGUNDOS A HORARIO.
+
+	char Prueba1[11] = "07:35:54.8";
+	char Prueba2[11] = "07:39:57.9";
+	int prueba1 = 0;
+	int prueba2 = 0;
+	int diferencia = 0;
+	prueba1 = horarioASegundos(Prueba1);
+	prueba2 = horarioASegundos(Prueba2);
+	segundosAHorario(prueba1,Prueba1);
+	segundosAHorario(prueba2,Prueba2);
+	cout << "Valor float1:" << prueba1 << endl;
+	cout << "float1 convertido: " << Prueba1 << endl;
+	cout << "Valor float2:" << prueba2 << endl;
+	cout << "float2 convertido: " << Prueba2 << endl;
+	diferencia = compararTiempos(prueba2,prueba1);
+	char diferenciaTXT[11];
+
+	segundosAHorario(diferencia,diferenciaTXT);
+	cout << "Valor diferencia:" << diferencia << endl;
+	cout << "Valor diferencia:" << diferenciaTXT << endl;
+	//////////////// BORRAR HASTA ACA
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
 	const char rutaCiudades [] = "Ciudades.bin";
 	const char rutaCarrera1 [] = "Carrera1.bin";
@@ -201,22 +223,20 @@ void cargarCorredoresVector(FILE *archivo, RegCorredores regCorredoresV[], int &
     }
 }
 
-float horarioASegundos(char horario[]){
-	float totalSegundos = 0.0;
+int horarioASegundos(char horario[]){
+	int totalSegundos = 0;
 
-	totalSegundos = ((horario[0]-'0')*10 + (horario[1]-'0')) * 3600
-    + ((horario[3]-'0')*10 + (horario[4]-'0')) * 60
-    + ((horario[6]-'0')*10 + (horario[7]-'0'))
-    + (static_cast<float>(horario[9]-'0'))/10;
+	totalSegundos = ((horario[0]-'0')*10 + (horario[1]-'0')) * 36000
+    + ((horario[3]-'0')*10 + (horario[4]-'0')) * 600
+    + ((horario[6]-'0')*10 + (horario[7]-'0')) * 10
+    + (horario[9]-'0');
 
     return totalSegundos;
 }
 
-void segundosAHorario(float totalSegundos, char* resultado) {
-	int decimales = (int)(totalSegundos * 10); //
-
-    int horas = decimales / 36000;
-    int restoHoras = decimales % 36000;
+void segundosAHorario(int totalSegundos, char* resultado) {
+	int horas = totalSegundos / 36000;
+    int restoHoras = totalSegundos % 36000;
 
     int minutos = restoHoras / 600;
     int restoMin = restoHoras % 600;
@@ -415,6 +435,7 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 
 			return;
 		}
+
 		aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[i-1].llegada);
 		char buffer[20];
 		segundosAHorario(aux, buffer);
