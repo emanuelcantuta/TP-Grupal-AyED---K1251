@@ -76,28 +76,7 @@ void registrarLocalidad(Localidad [], int&, CorredoresCiudad, char []);
 int cantTotalCorredores(Localidad);
 
 int main() {
-	// BORRAR CUANDO SE HAYA CORREGIDO: TEST ERROR DE CONVERSION DE HORARIO SEGUNDOS Y DE SEGUNDOS A HORARIO.
 
-	char Prueba1[11] = "07:35:54.8";
-	char Prueba2[11] = "07:39:57.9";
-	int prueba1 = 0;
-	int prueba2 = 0;
-	int diferencia = 0;
-	prueba1 = horarioASegundos(Prueba1);
-	prueba2 = horarioASegundos(Prueba2);
-	segundosAHorario(prueba1,Prueba1);
-	segundosAHorario(prueba2,Prueba2);
-	cout << "Valor float1:" << prueba1 << endl;
-	cout << "float1 convertido: " << Prueba1 << endl;
-	cout << "Valor float2:" << prueba2 << endl;
-	cout << "float2 convertido: " << Prueba2 << endl;
-	diferencia = compararTiempos(prueba2,prueba1);
-	char diferenciaTXT[11];
-
-	segundosAHorario(diferencia,diferenciaTXT);
-	cout << "Valor diferencia:" << diferencia << endl;
-	cout << "Valor diferencia:" << diferenciaTXT << endl;
-	//////////////// BORRAR HASTA ACA
 	const char rutaEntrada [] = "Archivo corredores 4Refugios.bin";
 	const char rutaCiudades [] = "Ciudades.bin";
 	const char rutaCarrera1 [] = "Carrera1.bin";
@@ -426,7 +405,7 @@ void generarReportePorCarreras(const char* ruta1, const char* ruta2, ReporteCorr
 }
 
 void calcularTiempos(ReporteCorredores reporte[], int longitud){
-	float aux;
+	int aux;
 
 	for(int i = 1; i<longitud; i++){
 		if(strcmp(reporte[i].llegada, "No termino") == 0){
@@ -604,7 +583,7 @@ void registrarLocalidad(Localidad salida[], int &cantLocalidades, CorredoresCiud
 	salida[posicionLocalidad].ciudades[posicionCiudad].cantCorredores++;
 	//Voy sumando los tiempos de los que terminaron para obtener el tiempoTotal (El promedio lo calculo al informar)
 	if(strncmp(llegada, "No termino", 11) != 0){
-    	float aux = horarioASegundos(llegada);
+    	int aux = horarioASegundos(llegada);
     	salida[posicionLocalidad].ciudades[posicionCiudad].tiempoTotal += aux;
     	salida[posicionLocalidad].ciudades[posicionCiudad].cantClasificados++;
 	}
