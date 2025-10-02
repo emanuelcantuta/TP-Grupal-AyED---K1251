@@ -535,7 +535,7 @@ void ordenarAlfabeticamenteCiudad(Ciudad entrada[], int cantCiudades){
 	}
 }
 
-int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre){
+int posLocalidad(Localidad localidades[], int cantLocalidades, char *nombre){
 	for(int i = 0; i < cantLocalidades; i++){
 		if(strncmp(localidades[i].nombre, nombre, 40) == 0){
 			return i;
@@ -544,7 +544,7 @@ int posLocalidad (Localidad localidades[], int cantLocalidades, char *nombre){
 	return -1;
 }
 
-int posCiudad (Localidad localidad, char *nombre){
+int posCiudad(Localidad localidad, char *nombre){
 	for(int i = 0; i < localidad.cantCiudades; i++){
 		if(strncmp(localidad.ciudades[i].nombre, nombre, 11) == 0){
 			return i;
@@ -632,3 +632,4 @@ int cantTotalCorredores(Localidad entrada){
 
 	return cantTotal;
 }
+
