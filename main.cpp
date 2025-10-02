@@ -102,7 +102,7 @@ int main() {
     FILE* carrera2 = fopen(rutaCarrera2, "wb");
 
 
-    if (!entrada || !carrera1 || !carrera2) {
+    if(!entrada || !carrera1 || !carrera2) {
         cout << "Error al abrir uno de los archivos.\n";
         return 1;
     }
@@ -147,7 +147,7 @@ int main() {
 
 	FILE* podios = fopen(rutaPodios, "wb");
 
-	if (!podios) {
+	if(!podios) {
 		cout << "Error al crear archivo 'podios.bin'";
 		return 1;
 	}
@@ -161,7 +161,7 @@ int main() {
 	Localidad localidades[100];
 
 	entrada = fopen(rutaCiudades, "rb");
-    if (!entrada) {
+    if(!entrada) {
         cout << "Error al abrir uno de los archivos.\n";
         return 1;
     }
@@ -169,10 +169,10 @@ int main() {
     cargarCiudadVector(entrada, ciudadV, longitud3);
 
     //Recorro el vector de ciudades para ir registrando cada localidad en el vector localidades
-    for (int i = 0; i < longitud3; i++) {
+    for(int i = 0; i < longitud3; i++) {
     	//Recorro el vector RegCorredores para encontrar el tiempo de cada corredor
-    	for (int j = 0; j < longitud; j++){
-    		if (ciudadV[i].numero == regCorredoresV[j].numero){
+    	for(int j = 0; j < longitud; j++){
+    		if(ciudadV[i].numero == regCorredoresV[j].numero){
 		        registrarLocalidad(localidades, cantLocalidades, ciudadV[i], regCorredoresV[j].llegada);
 		        break;
 			}
@@ -186,7 +186,7 @@ int main() {
 
 void noTermino(RegCorredores vectorEntrada[], int longitud){
 	for(int i = 0; i < longitud; i++){
-		if (strncmp(vectorEntrada[i].llegada, "DNF", 3) == 0 ||	strncmp(vectorEntrada[i].llegada, "DSQ", 3) == 0 ){
+		if(strncmp(vectorEntrada[i].llegada, "DNF", 3) == 0 ||	strncmp(vectorEntrada[i].llegada, "DSQ", 3) == 0 ){
 			strcpy(vectorEntrada[i].llegada, "No termino");
 		}
 	}
@@ -196,7 +196,7 @@ void cargarCorredoresVector(FILE *archivo, RegCorredores regCorredoresV[], int &
 	longitud = 0;
     RegCorredores temp;
 
-    while (fread(&temp, sizeof(RegCorredores), 1, archivo) == 1) {
+    while(fread(&temp, sizeof(RegCorredores), 1, archivo) == 1){
         regCorredoresV[longitud] = temp;
         longitud++;
     }
@@ -241,11 +241,10 @@ void ordenarPorTiempo (RegCorredores vector[],int longitud){
 	float tiempo1 = 0.0, tiempo2 = 0.0;
 
 	for (int i = 0; i < longitud - 1; i++){
-
-		for (int j = 0;j<longitud - i - 1;j++){
+		for (int j = 0; j < longitud - i - 1; j++){
 			tiempo1 = horarioASegundos(vector[j].llegada);
 			tiempo2 = horarioASegundos(vector[j+1].llegada);
-
+			
 			if (tiempo1>tiempo2){
 				aux = vector[j];
 				vector[j] = vector [j+1];
@@ -256,11 +255,11 @@ void ordenarPorTiempo (RegCorredores vector[],int longitud){
 }
 
 void separarEnVectoresPorCarrera(RegCorredores vectorCorredores[], int longitud, RegCorredores categoria1[], int &long1, RegCorredores categoria2[], int &long2){
-	for (int i = 0; i < longitud; i++){
-		if (strncmp(vectorCorredores[i].categoria, "4 Refugios Clasica", 18) == 0) {
+	for(int i = 0; i < longitud; i++){
+		if(strncmp(vectorCorredores[i].categoria, "4 Refugios Clasica", 18) == 0) {
 			categoria1[long1] = vectorCorredores[i];
 			long1++;
-		}else {
+		}else{
 			categoria2[long2] = vectorCorredores[i];
 			long2++;
 		}
@@ -268,11 +267,11 @@ void separarEnVectoresPorCarrera(RegCorredores vectorCorredores[], int longitud,
 }
 
 void leerVectorCorredores(RegCorredores regCorredores[], int longitud){
-	printf("-----------------------------------------------------------------------------------------------------------------------------\n");
-    printf("Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    \n");
-    printf("-----------------------------------------------------------------------------------------------------------------------------\n");
+	cout << "-----------------------------------------------------------------------------------------------------------------------------\n";
+    cout << "Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    \n";
+    cout << "-----------------------------------------------------------------------------------------------------------------------------\n";
 
-    for (int i = 0; i < longitud; i++) {
+    for(int i = 0; i < longitud; i++) {
         printf("%6d | %-37s | %-48s |   %c    | %-18s | %-10s\n",
                regCorredores[i].numero,
                regCorredores[i].nombreApellido,
@@ -281,8 +280,7 @@ void leerVectorCorredores(RegCorredores regCorredores[], int longitud){
                regCorredores[i].localidad,
                regCorredores[i].llegada);
     }
-
-    printf("-----------------------------------------------------------------------------------------------------------------------------\n");
+    cout <<"-----------------------------------------------------------------------------------------------------------------------------\n"; 
 }
 
 void leerVectorPodios(RegCorredores regCorredores[], int longitud) {
@@ -290,15 +288,13 @@ void leerVectorPodios(RegCorredores regCorredores[], int longitud) {
 
     for (int i = 0; i < longitud; ) {
         cout << "\nCATEGORIA: " << regCorredores[i].categoria << endl;
-
         int posicion = 1;
         // Mostrar hasta 3 corredores de esa categoría
-        for (int j = 0; j < 3 && i + j < longitud; j++) {
+        for(int j = 0; j < 3 && i + j < longitud; j++) {
             // Si la categoría cambia, salimos
-            if (strcmp(regCorredores[i].categoria, regCorredores[i + j].categoria) != 0) {
+            if(strcmp(regCorredores[i].categoria, regCorredores[i + j].categoria) != 0) {
                 break;
             }
-
             cout << "----------------------------------------" << endl;
             cout << "Posicion " << posicion << ":" << endl;
             cout << "Numero: " << regCorredores[i + j].numero << endl;
@@ -325,7 +321,7 @@ int compararTiempos (float tiempoReferencia, float tiempoActual){
 }
 
 void inicializarReporte(RegCorredores vector1[],int longitud1, ReporteCorredores vector2[]){ //base de la estructura de REPORTECORREDORES
-	for (int i = 0; i < longitud1; i++){
+	for(int i = 0; i < longitud1; i++){
 		vector2[i].posGral = i;
 		vector2[i].posCategoria = -1; // Reemplazar por funcion?
 		vector2[i].posGenero = -1;  // Reemplazar por funcion?
@@ -343,14 +339,14 @@ void inicializarReporte(RegCorredores vector1[],int longitud1, ReporteCorredores
 }
 
 void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
-    for (int i=0; i<longitud; i++) {
+    for(int i = 0; i < longitud; i++) {
         // Posición general
         reporte[i].posGral = i+1;
 
         // Posición por género
         int rankingGenero = 1;
-        for (int j=0; j<i; j++) {
-            if (reporte[j].genero == reporte[i].genero) {
+        for(int j = 0; j < i; j++) {
+            if(reporte[j].genero == reporte[i].genero) {
                 rankingGenero++;
             }
         }
@@ -358,8 +354,8 @@ void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
 
         // Posición por categoría, para contar debe estar previamente ordenado por categoria
         int rankingCat = 1;
-        for (int j = 0; j < i; j++) {
-            if (strcmp(reporte[j].categoria, reporte[i].categoria) == 0) {
+        for(int j = 0; j < i; j++) {
+            if(strcmp(reporte[j].categoria, reporte[i].categoria) == 0) {
                 rankingCat++;
             }
         }
@@ -368,9 +364,9 @@ void calcularPosiciones(ReporteCorredores reporte[] , int longitud) {
 }
 
 void imprimirReporte(ReporteCorredores reporte[], int longitud){
-	printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
-    printf("PosGral | PosGen | PosCat | Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    | DifPrimero | DifAnterior\n");
-    printf("---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n");
+	cout << "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n";
+	cout << "PosGral | PosGen | PosCat | Numero | Nombre y Apellido                     | Categoria                                        | Genero | Localidad          | Llegada    | DifPrimero | DifAnterior\n";
+    cout << "---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n"; 
 
     for(int i = 0; i < longitud; i++) {
         printf("%7d | %6d | %6d | %6d | %-37s | %-48s |   %c    | %-18s | %-10s | %-10s | %-10s\n",
@@ -414,7 +410,6 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 
 			return;
 		}
-
 		aux = horarioASegundos(reporte[i].llegada) - horarioASegundos(reporte[i-1].llegada);
 		char buffer[20];
 		segundosAHorario(aux, buffer);
@@ -429,46 +424,41 @@ void calcularTiempos(ReporteCorredores reporte[], int longitud){
 void crearVectorCategorias(RegCorredores vectorARecorrer[], int longitud, char categoriasEncontradas[][50], int &cantCategorias){
 	cantCategorias = 0; // Inicializo en 0, aún no se separaron categorias
 
-	for (int i = 0;i < longitud; i++){
+	for(int i = 0; i < longitud; i++){
 		bool yaLeido = false; // Se reinicia el valor a false porque aún no hizo comprobaciones
 		// Chequea el vector categoriasEncontradas en busca de coincidencias
 		for (int j = 0;j < cantCategorias; j++){
 			//Si encuentra una coincidencia, deja de buscar y pasa al siguiente valor.
-			if (strcmp(vectorARecorrer[i].categoria,categoriasEncontradas[j])  == 0){
+			if(strcmp(vectorARecorrer[i].categoria,categoriasEncontradas[j])  == 0){
 				yaLeido = true;
 				break;
 			}
 		}
-		if (!yaLeido){
+		if(!yaLeido){
 			strcpy(categoriasEncontradas[cantCategorias], vectorARecorrer[i].categoria);
 			cantCategorias++;
 		}
 	}
 }
 
-void ordenarCategorias(char vectorAOrdenar[][50],int longitud)
-{
+void ordenarCategorias(char vectorAOrdenar[][50],int longitud){
 	char aux[50];
 	int posCaracteres1;
 	int posCaracteres2;
 
 	// Comparo el valor del caracter decenas de las categorías y los ordena de menor a mayor.
-	for (int i=0;i<longitud-1;i++)
-	{
-
+	for(int i = 0; i < longitud-1; i++){
 		for(int j = 0; j < longitud-1-i; j++){
 			posCaracteres1 = strlen(vectorAOrdenar[j]) - 9;
 			posCaracteres2 = strlen(vectorAOrdenar[j+1]) - 9;
 
-			if (vectorAOrdenar[j][posCaracteres1] > vectorAOrdenar[j+1][posCaracteres2])
-			{
+			if (vectorAOrdenar[j][posCaracteres1] > vectorAOrdenar[j+1][posCaracteres2]){
 				strcpy(aux,vectorAOrdenar [j]);
 				strcpy(vectorAOrdenar [j],vectorAOrdenar [j+1]);
 				strcpy(vectorAOrdenar [j+1],aux);
 			}
 		}
 	}
-
 	// Compara el valor de los primeros 22 caracteres, para ordenar asi entre Non-Stop/Clásica y entre Dama/Caballero.
 	for(int i = 0; i < longitud-1; i++){
 		for(int j = 0; j < longitud-1-i; j++){
@@ -486,7 +476,6 @@ void crearVectorPodio(char vectorCategorias[][50],int cantCategorias, RegCorredo
 
 	for (int i = 0; i < cantCategorias; i++){
 		int podio = 0;
-
 		for (int j = 0; j < longitud; j++){
 			// Recorre el vector de corredores hasta encontrar el primer resultado que coincida con la categoria
 			if (strcmp (vectorCategorias[i],vectorARecorrer[j].categoria) == 0){
